@@ -74,7 +74,7 @@ html
         top: 50px;
         right: 0;
         bottom: 0;
-        color: #fff;
+        color: #000;
         font-size: 90%;
       }
 
@@ -85,12 +85,12 @@ html
       .selection th {
         text-align: center;
         padding: 5px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid #eee;
         font-weight: normal;
       }
 
       .selection td {
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid #eee;
       }
 
       .selection h3 {
@@ -103,7 +103,7 @@ html
 
       .selection ul {
         list-style: none;
-        margin: 5px;
+        margin: 0;
         padding: 0;
       }
 
@@ -111,6 +111,45 @@ html
         display: block;
         margin: 0;
         padding: 0;
+        height: 40px;
+      }
+
+      .selection ul li h3 {
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        line-height: 20px;
+        height: 20px;
+        padding: 0 5px;
+      }
+
+      .selection ul li .details {
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        line-height: 20px;
+        height: 20px;
+        padding: 0 5px;
+      }
+
+      .selection ul li .graph {
+        white-space: nowrap;
+        font-size: 0;
+        margin: 0;
+        position: relative;
+        top: -40px;
+        height: 40px;
+      }
+
+      .selection ul li .graph i {
+        display: inline-block;
+        height: 100%;
+        width: 5%;
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .selection ul li .graph i.y {
+        background: rgba(255, 255, 255, 0.7);
       }
 
   body
@@ -168,7 +207,7 @@ html
         li 视听语言
         li 第二外语（日语）I
 
-    div.palette-belize-hole.selection
+    div.selection
       table
         tr
           th
@@ -181,15 +220,64 @@ html
           th 1 - 2<br>09:00 - 10:20
           td &nbsp;
           td &nbsp;
-          td &nbsp;
+          td
             ul
-              li
+              li(style='background:#F39C12')
                 h3 Java 基础入门
-                p
+                p.details
                   span.class MA
                   span.teacher 某老师
-                  span.weeks 1-17
+                  span.weeks 2-16/双周
                   span.room U208
+                p.graph
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i
+                  i
+                  i
+              li(style='background:#8E44AD')
+                h3 Android 项目实践
+                p.details
+                  span.class QA
+                  span.teacher 某老师
+                  span.weeks 1-17/单周
+                  span.room U208
+                p.graph
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i.y
+                  i
+                  i
+                  i
           td &nbsp;
           td &nbsp;
         tr
