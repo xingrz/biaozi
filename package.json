@@ -1,0 +1,56 @@
+{
+  "name": "biaozi"
+, "version": "0.1.0"
+, "private": true
+, "description": ""
+, "main": "server.js"
+, "dependencies": {
+    "cheerio": "latest"
+  , "connect-ensure-login": "latest"
+  , "connect-redis": "latest"
+  , "debug": "latest"
+  , "eventproxy": "latest"
+  , "express": "3.X"
+  , "iconv-lite": "latest"
+  , "jade": "latest"
+  , "mysql": "2.X"
+  , "nib": "latest"
+  , "passport": "0.1.X"
+  , "passport-local": "0.1.X"
+  , "request": "2.X"
+  , "sequelize": "2.X"
+  , "stylus": "latest"
+  , "underscore": "latest"
+  }
+, "devDependencies": {
+    "mocha": "*"
+  , "should": "*"
+  , "blanket": "*"
+  , "travis-cov": "*"
+  , "supertest": "*"
+  , "muk": "*"
+  }
+,  "engines": {
+    "node": "0.10.X"
+  }
+, "scripts": {
+    "test": "make test"
+  , "start": "node server.js"
+  , "blanket": {
+      "pattern": "//^((?!(node_modules|test)).)*$/"
+    , "data-cover-flags": {
+        "debug": false
+      }}
+  , "travis-cov": { "threshold": 80 }
+  }
+, "author": "XiNGRZ <chenxingyu92@gmail.com>"
+, "repository": {
+    "type": "git"
+  , "url": "https://github.com/xingrz/biaozi.git"
+  }
+, "config": {
+    "redis": { "prefix": "biaozi:session:" }
+  , "mysql": { "username": "biaozi", "database": "biaozi" }
+  , "cookie": { "secret": "6278ef12964caa125c3fc194513dffd3" }
+  }
+}

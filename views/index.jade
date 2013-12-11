@@ -1,0 +1,278 @@
+doctype 5
+html
+  head
+    title 排课神器
+
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+
+    link(rel='stylesheet', href='/static/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/static/css/flat-ui.css')
+
+    style.
+      * {
+        border-radius: 0 !important;
+      }
+
+      .navbar {
+        padding: 0 20px;
+        margin: 0;
+      }
+
+      .brand {
+        color: #fff;
+        line-height: 50px;
+        margin: 0;
+      }
+
+      .logged {
+        color: #ccc;
+        font-size: 75%;
+        line-height: 50px;
+        margin: 0;
+      }
+
+      h2 {
+        font-size: 120%;
+        font-weight: normal;
+        color: #fff;
+        padding: 10px 20px;
+        margin: 0;
+      }
+
+      .availables {
+        position: absolute;
+        left: 0;
+        top: 50px;
+        width: 200px;
+        bottom: 0;
+        overflow-y: scroll;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .availables li {
+        display: block;
+        color: #fff;
+        cursor: pointer;
+        margin: 0;
+        padding: 10px 20px;
+      }
+
+      .availables li:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .availables li.selected {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .selection {
+        position: absolute;
+        left: 200px;
+        top: 50px;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        font-size: 90%;
+      }
+
+      .selection table {
+        width: 100%;
+      }
+
+      .selection th {
+        text-align: center;
+        padding: 5px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        font-weight: normal;
+      }
+
+      .selection td {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .selection h3 {
+        font-size: inherit;
+      }
+
+      .selection p {
+        font-size: inherit;
+      }
+
+      .selection ul {
+        list-style: none;
+        margin: 5px;
+        padding: 0;
+      }
+
+      .selection ul li {
+        display: block;
+        margin: 0;
+        padding: 0;
+      }
+
+  body
+    div.navbar.navbar-inverse
+      p.brand.pull-left 排课神器
+      p.logged.pull-right
+        | #{logged.username} &nbsp;
+        a(href='/signout') 注销
+
+    div.main
+      ul.palette-peter-river.availables
+        li 计算机编程基础
+        li.selected Android 应用开发入门
+        li Illustrator 软件应用
+        li Photoshop 软件应用
+        li.selected 苹果实用软件入门
+        li.selected 企业级 Java I
+        li 雕塑
+        li 视听语言
+        li 第二外语（日语）I
+        li 计算机编程基础
+        li Android 应用开发入门
+        li Illustrator 软件应用
+        li Photoshop 软件应用
+        li 苹果实用软件入门
+        li 企业级 Java I
+        li 雕塑
+        li 视听语言
+        li 第二外语（日语）I
+        li 计算机编程基础
+        li Android 应用开发入门
+        li Illustrator 软件应用
+        li Photoshop 软件应用
+        li 苹果实用软件入门
+        li 企业级 Java I
+        li 雕塑
+        li 视听语言
+        li 第二外语（日语）I
+        li 计算机编程基础
+        li Android 应用开发入门
+        li Illustrator 软件应用
+        li Photoshop 软件应用
+        li 苹果实用软件入门
+        li 企业级 Java I
+        li 雕塑
+        li 视听语言
+        li 第二外语（日语）I
+        li 计算机编程基础
+        li Android 应用开发入门
+        li Illustrator 软件应用
+        li Photoshop 软件应用
+        li 苹果实用软件入门
+        li 企业级 Java I
+        li 雕塑
+        li 视听语言
+        li 第二外语（日语）I
+
+    div.palette-belize-hole.selection
+      table
+        tr
+          th
+          th(width='18%') 周一
+          th(width='18%') 周二
+          th(width='18%') 周三
+          th(width='18%') 周四
+          th(width='18%') 周五
+        tr
+          th 1 - 2<br>09:00 - 10:20
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+            ul
+              li
+                h3 Java 基础入门
+                p
+                  span.class MA
+                  span.teacher 某老师
+                  span.weeks 1-17
+                  span.room U208
+          td &nbsp;
+          td &nbsp;
+        tr
+          th 3 - 4<br>10:40 - 12:00
+          td
+            ul
+              li
+                h3 Java 基础入门
+                p
+                  span.class MA
+                  span.teacher 某老师
+                  span.weeks 1-17
+                  span.room U208
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+        tr
+          th 5 - 6<br>12:30 - 13:50
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+            ul
+              li
+                h3 Java 基础入门
+                p
+                  span.class MA
+                  span.teacher 某老师
+                  span.weeks 1-17
+                  span.room U208
+          td &nbsp;
+        tr
+          th 7 - 8<br>14:00 - 15:20
+          td &nbsp;
+          td
+            ul
+              li
+                h3 Java 基础入门
+                p
+                  span.class MA
+                  span.teacher 某老师
+                  span.weeks 1-17
+                  span.room U208
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+        tr
+          th 9 - 10<br>15:30 - 16:50
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+        tr
+          th 11 - 12<br>17:00 - 18:20
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+        tr
+          th 13 - 14<br>19:00 - 20:20
+          td &nbsp;
+          td &nbsp;
+          td
+            ul
+              li
+                h3 Java 基础入门
+                p
+                  span.class MA
+                  span.teacher 某老师
+                  span.weeks 1-17
+                  span.room U208
+          td &nbsp;
+          td &nbsp;
+
+        tr
+          th 15 - 16<br>20:30 - 21:50
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+          td &nbsp;
+
+

@@ -1,0 +1,44 @@
+doctype 5
+html
+  head
+    title 排课神器
+
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+
+    link(rel='stylesheet', href='/static/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/static/css/flat-ui.css')
+
+    style.
+      .container {
+        max-width: 970px !important;
+        padding-top: 100px;
+      }
+
+      * {
+        border-radius: 0 !important;
+      }
+
+      .login-icon > h4 {
+        line-height: 1.2;
+        text-align: right;
+      }
+
+  body
+    div.container
+      div.login
+        div.login-screen
+          //- div.login-icon
+            //- img(src='/static/images/logo.png')
+            //- h4: strong 排课神器
+
+          form.login-form(method='post')
+            div.form-group
+              input(name='username', type='text', placeholder='学号', required, autofocus).form-control.login-field#login-name
+              label.login-field-icon.fui-user(for='login-name')
+
+            div.form-group
+              input(name='password', type='password', placeholder='MYSISE 密码', required).form-control.login-field#login-pass
+              label.login-field-icon.fui-lock(for='login-pass')
+
+            button.btn.btn-info.btn-lg.btn-block(type='submit') 登录
