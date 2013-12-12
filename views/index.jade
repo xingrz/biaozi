@@ -87,10 +87,12 @@ html
         padding: 5px;
         border: 1px solid #eee;
         font-weight: normal;
+        vertical-align: top;
       }
 
       .selection td {
         border: 1px solid #eee;
+        vertical-align: top;
       }
 
       .selection h3 {
@@ -130,6 +132,10 @@ html
         line-height: 20px;
         height: 20px;
         padding: 0 5px;
+      }
+
+      .selection ul li .details span {
+        margin-right: 1em;
       }
 
       .selection ul li .graph {
@@ -216,151 +222,57 @@ html
           th(width='18%') 周三
           th(width='18%') 周四
           th(width='18%') 周五
-        tr
-          th 1 - 2<br>09:00 - 10:20
-          td &nbsp;
-          td &nbsp;
-          td
-            ul
-              li(style='background:#F39C12')
-                h3 Java 基础入门
-                p.details
-                  span.class MA
-                  span.teacher 某老师
-                  span.weeks 2-16/双周
-                  span.room U208
-                p.graph
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i
-                  i
-                  i
-              li(style='background:#8E44AD')
-                h3 Android 项目实践
-                p.details
-                  span.class QA
-                  span.teacher 某老师
-                  span.weeks 1-17/单周
-                  span.room U208
-                p.graph
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i.y
-                  i
-                  i
-                  i
-          td &nbsp;
-          td &nbsp;
-        tr
-          th 3 - 4<br>10:40 - 12:00
-          td
-            ul
-              li
-                h3 Java 基础入门
-                p
-                  span.class MA
-                  span.teacher 某老师
-                  span.weeks 1-17
-                  span.room U208
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-        tr
-          th 5 - 6<br>12:30 - 13:50
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-            ul
-              li
-                h3 Java 基础入门
-                p
-                  span.class MA
-                  span.teacher 某老师
-                  span.weeks 1-17
-                  span.room U208
-          td &nbsp;
-        tr
-          th 7 - 8<br>14:00 - 15:20
-          td &nbsp;
-          td
-            ul
-              li
-                h3 Java 基础入门
-                p
-                  span.class MA
-                  span.teacher 某老师
-                  span.weeks 1-17
-                  span.room U208
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-        tr
-          th 9 - 10<br>15:30 - 16:50
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-        tr
-          th 11 - 12<br>17:00 - 18:20
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-        tr
-          th 13 - 14<br>19:00 - 20:20
-          td &nbsp;
-          td &nbsp;
-          td
-            ul
-              li
-                h3 Java 基础入门
-                p
-                  span.class MA
-                  span.teacher 某老师
-                  span.weeks 1-17
-                  span.room U208
-          td &nbsp;
-          td &nbsp;
 
-        tr
-          th 15 - 16<br>20:30 - 21:50
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
-          td &nbsp;
+        times = [ '09:00 - 10:20', '10:40 - 12:00', '12:30 - 13:50', '14:00 - 15:20', '15:30 - 16:50', '17:00 - 18:20', '19:00 - 20:20', '20:30 - 21:50' ]
 
+        each row, time in schedule
+          tr
+            th
+              div #{time * 2 + 1} - #{time * 2 + 2}
+              div #{times[time]}
+            each cell in row
+              td
+                ul
+                  each klass in cell
+                    li(style='background:#F39C12')
+                      week = klass.week
+                      h3 #{klass.name}
+                      p.details
+                        span.class #{klass.code}
+                        span.teacher #{klass.teacher}
+                        span.weeks
+                          if week.which
+                            | 第 #{week.which} 周
+                          else if week.weeks
+                            | 第 #{week.weeks.join(' ')} 周
+                          else if week.interval
+                            case week.interval
+                              when 1
+                                | 第 #{week.start} - #{week.end} 周
+                              when 2
+                                if week.start % 2
+                                  | 第 #{week.start} - #{week.end} 周单周
+                                else
+                                  | 第 #{week.start} - #{week.end} 周双周
+                              default
+                                | 第 #{week.start} - #{week.end} 周每隔 #{week.interval} 周
+                        span.location #{klass.location}
+                      p.graph
+                        - var weeks = []
+                        - for (var i = 0; i < 20; i++)
+                          - weeks[i] = 0
 
+                        if week.which
+                          - weeks[week.which - 1] = 1
+                        else if week.weeks
+                          each w in week.weeks
+                            - weeks[w - 1] = 1
+                        else if week.interval
+                          - for (var w = week.start; w <= week.end; w += week.interval)
+                            - weeks[w - 1] = 1
+
+                        each w in weeks
+                          if w == 1
+                            i.y
+                          else
+                            i
