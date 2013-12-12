@@ -1,0 +1,135 @@
+
+h2 {
+  font-size: 120%;
+  font-weight: normal;
+  color: #fff;
+  padding: 10px 20px;
+  margin: 0;
+}
+
+#availables {
+  position: absolute;
+  left: 0;
+  top: 50px;
+  width: 200px;
+  bottom: 0;
+  overflow-y: scroll;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#availables li {
+  display: block;
+  color: #fff;
+  cursor: pointer;
+  margin: 0;
+  padding: 10px 20px;
+}
+
+#availables li:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#availables li.selected {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+#schedule {
+  position: absolute;
+  left: 200px;
+  top: 50px;
+  right: 0;
+  bottom: 0;
+  color: #000;
+  font-size: 90%;
+}
+
+#schedule table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+#schedule th {
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #eee;
+  font-weight: normal;
+  vertical-align: top;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#schedule td {
+  border: 1px solid #eee;
+  vertical-align: top;
+}
+
+#schedule h3 {
+  font-size: inherit;
+}
+
+#schedule p {
+  font-size: inherit;
+}
+
+#schedule ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#schedule ul li {
+  display: block;
+  margin: 0;
+  padding: 0;
+  height: 40px;
+}
+
+#schedule ul li h3 {
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  line-height: 20px;
+  height: 20px;
+  padding: 0 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#schedule ul li .details {
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  line-height: 20px;
+  height: 20px;
+  padding: 0 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#schedule ul li .details span {
+  margin-right: 1em;
+}
+
+#schedule ul li .graph {
+  white-space: nowrap;
+  font-size: 0;
+  margin: 0;
+  position: relative;
+  top: -40px;
+  height: 40px;
+}
+
+#schedule ul li .graph i {
+  display: inline-block;
+  height: 100%;
+  width: 5%;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+#schedule ul li .graph i.y {
+  background: rgba(255, 255, 255, 0.7);
+}

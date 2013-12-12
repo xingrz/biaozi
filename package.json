@@ -23,12 +23,13 @@
   , "underscore": "latest"
   }
 , "devDependencies": {
-    "mocha": "*"
-  , "should": "*"
-  , "blanket": "*"
-  , "travis-cov": "*"
-  , "supertest": "*"
-  , "muk": "*"
+    "mocha": "latest"
+  , "should": "latest"
+  , "blanket": "latest"
+  , "travis-cov": "latest"
+  , "supertest": "latest"
+  , "muk": "latest"
+  , "uglify-js": "latest"
   }
 ,  "engines": {
     "node": "0.10.X"

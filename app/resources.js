@@ -12,14 +12,9 @@ module.exports = function (app) {
   app.get('/signin'   , ensureNotLoggedIn, index.signin)
     .post('/signin'   , ensureNotLoggedIn, index.authenticate)
 
-  /*var users = require('../controllers/users')
-  app.all('/users'                  , ensureLoggedIn, users.index)
-  app.all('/users/:user'            , ensureLoggedIn, users.show)
-  app.all('/users/:user/renew'      , ensureLoggedIn, users.renew)
-  app.all('/users/:user/remove'     , ensureLoggedIn, users.destroy)
-  app.all('/users/:user/reinstall'  , ensureLoggedIn, users.reinstall)*/
-
-
+  var calendarApi = require('../routes/api/calendar')
+  app.get('/api/calendar',  ensureLoggedIn,   calendarApi.show)
+    .post('/api/calendar',  ensureLoggedIn,   calendarApi.create)
 
   // serves stylus compiled css
   var stylus = require('stylus')
@@ -27,9 +22,9 @@ module.exports = function (app) {
 
   var dev = 'development' == app.get('env')
 
-  app.use('/assets/stylesheets', stylus.middleware({
-    src: join(__dirname, './assets/stylesheets')
-  , dest: join(__dirname, '../public/assets/stylesheets')
+  app.use('/assets/css', stylus.middleware({
+    src: join(__dirname, './assets/css')
+  , dest: join(__dirname, '../public/assets/css')
   , compile: function (str, path) {
       return stylus(str)
         .set('filename', path)
@@ -39,6 +34,10 @@ module.exports = function (app) {
         .use(nib())
     }
   }))
+
+  if (dev) {
+    app.use('/assets/js', express.static(join(__dirname, './assets/js')))
+  }
 
   // serves general static files
   app.use(express.static(join(__dirname, '../public')))

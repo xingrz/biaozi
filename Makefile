@@ -5,13 +5,26 @@ MOCHA_OPTS =
 NODE_MODULES = ./node_modules
 BIN = $(NODE_MODULES)/.bin
 
-build: clean install
-	@mkdir -p public/assets/stylesheets
-	@$(BIN)/stylus \
+build: build-css build-js
+
+build-css: install
+	rm -rf public/assets/css
+	mkdir -p public/assets/css
+	$(BIN)/stylus \
 		-c \
-		-o public/assets/stylesheets \
+		-o public/assets/css \
 		-u $(NODE_MODULES)/nib \
-		app/assets/stylesheets/*
+		app/assets/css/*
+
+build-js: install
+	rm -rf public/assets/js
+	mkdir -p public/assets/js
+	cd app/assets/js && for i in *.js; do (\
+		../../../$(BIN)/uglifyjs $$i \
+		--mangle \
+		--compress \
+		--output ../../../public/assets/js/$$i \
+	); done
 
 install:
 	@npm install
