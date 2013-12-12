@@ -29,51 +29,6 @@ html
         a(href='/signout') 注销
 
     ul#availables.palette-peter-river
-      li 计算机编程基础
-      li.selected Android 应用开发入门
-      li Illustrator 软件应用
-      li Photoshop 软件应用
-      li.selected 苹果实用软件入门
-      li.selected 企业级 Java I
-      li 雕塑
-      li 视听语言
-      li 第二外语（日语）I
-      li 计算机编程基础
-      li Android 应用开发入门
-      li Illustrator 软件应用
-      li Photoshop 软件应用
-      li 苹果实用软件入门
-      li 企业级 Java I
-      li 雕塑
-      li 视听语言
-      li 第二外语（日语）I
-      li 计算机编程基础
-      li Android 应用开发入门
-      li Illustrator 软件应用
-      li Photoshop 软件应用
-      li 苹果实用软件入门
-      li 企业级 Java I
-      li 雕塑
-      li 视听语言
-      li 第二外语（日语）I
-      li 计算机编程基础
-      li Android 应用开发入门
-      li Illustrator 软件应用
-      li Photoshop 软件应用
-      li 苹果实用软件入门
-      li 企业级 Java I
-      li 雕塑
-      li 视听语言
-      li 第二外语（日语）I
-      li 计算机编程基础
-      li Android 应用开发入门
-      li Illustrator 软件应用
-      li Photoshop 软件应用
-      li 苹果实用软件入门
-      li 企业级 Java I
-      li 雕塑
-      li 视听语言
-      li 第二外语（日语）I
 
     div#schedule
       table
@@ -88,10 +43,9 @@ html
         times = [ '09:00 - 10:20', '10:40 - 12:00', '12:30 - 13:50', '14:00 - 15:20', '15:30 - 16:50', '17:00 - 18:20', '19:00 - 20:20', '20:30 - 21:50' ]
 
         each timeName, time in times
-          tr
+          tr(data-time='#{time}')
             th
               div #{time * 2 + 1} - #{time * 2 + 2}
               div #{timeName}
             - for (var day = 0; day < 5; day++)
-              td
-                ul(id='cell-#{day}-#{time}')
+              td(data-day='#{day}'): ul

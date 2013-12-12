@@ -3,15 +3,16 @@ $(function () {
   var colorOfName = {}
   function color (name) {
     if (colorOfName[name]) return colorOfName[name]
-    var r = Math.floor(Math.random() * 0xef + 0x10)
-    var g = Math.floor(Math.random() * 0xef + 0x10)
-    var b = Math.floor(0xff - (r + g) / 2)
+    var r = Math.floor(Math.random() * 0xef) + 0x10
+    var g = Math.floor(Math.random() * 0xef) + 0x10
+    var b = Math.floor(0xff - (r + g) / 2) + 0x10
     colorOfName[name] = '#' + r.toString(16) + g.toString(16) + b.toString(16)
     return colorOfName[name]
   }
 
   $.get('/api/calendar', function (json) {
     var schedule = ScheduleBuilder.build(json)
+    var table = $('#schedule table')
     schedule.forEach(function (row, time) {
       row.forEach(function (cell, day) {
         cell.forEach(function (klass) {
@@ -73,10 +74,19 @@ $(function () {
 
           html += '</li>'
 
-          $('#cell-' + day + '-' + time).append(html)
+          table.find('[data-time="' + time + '"] [data-day="' + day + '"] ul').append(html)
         })
       })
     })
 
   }, 'json')
+
+
+  $.get('/api/courses', function (json) {
+    $('#availables').html(json.map(function (course) {
+      console.log(course)
+      return '<li>' + course.name + '</li>'
+    }).join(''))
+  }, 'json')
+
 })

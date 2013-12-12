@@ -16,6 +16,10 @@ module.exports = function (app) {
   app.get('/api/calendar',  ensureLoggedIn,   calendarApi.show)
     .post('/api/calendar',  ensureLoggedIn,   calendarApi.create)
 
+  var coursesApi = require('../routes/api/courses')
+  app.get('/api/courses'        , coursesApi.index)
+     .get('/api/courses/:code'  , coursesApi.show)
+
   // serves stylus compiled css
   var stylus = require('stylus')
     , nib = require('nib')
