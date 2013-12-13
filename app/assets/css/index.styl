@@ -43,6 +43,7 @@ h2 {
     white-space nowrap
     padding 0 20px
     cursor pointer
+    transition background 500ms
   }
 
   > ul {
@@ -54,6 +55,12 @@ h2 {
     > li {
       display block
       padding 0 10px 0 30px
+      cursor pointer
+      transition background 500ms
+
+      &:hover {
+        background rgba(255, 255, 255, 0.1)
+      }
 
       > ul {
         padding 0
@@ -70,7 +77,7 @@ h2 {
 
   .fui-heart,
   .fui-lock {
-    color rgba(0, 0, 0, 0.2)
+    color rgba(0, 0, 0, 0.1)
     float right
     cursor pointer
     transition color 300ms
@@ -83,6 +90,15 @@ h2 {
       color #fff
     }
   }
+
+  li {
+    color rgba(255, 255, 255, 0.75)
+    transition color 300ms
+
+    &:hover {
+      color rgba(255, 255, 255, 1.0)
+    }
+  }
 }
 
 #schedule {
@@ -93,6 +109,7 @@ h2 {
   bottom 0
   color #000
   font-size 90%
+  overflow-y scroll
 }
 
 #schedule table {
@@ -129,11 +146,21 @@ h2 {
   padding 0
 }
 
+@-webkit-keyframes pending {
+  0%   { opacity 0.10 }
+  50%  { opacity 0.75 }
+  100% { opacity 0.10 }
+}
+
 #schedule ul li {
   display block
   margin 0
   padding 0
   height 40px
+
+  &[data-pending] {
+    -webkit-animation pending linear 1s infinite
+  }
 }
 
 #schedule ul li h3 {

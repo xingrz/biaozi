@@ -10,19 +10,22 @@ $(function () {
     return colorOfName[name]
   }
 
-  var availables = []
-
   $.get('/api/calendar', function (calendar) {
     calendar.forEach(function (course) {
       course.klass.schedule.forEach(function (scheduleItem) {
         insertScheduleItem(course, course.klass, scheduleItem)
       })
+
+      if (course.klass.subklass) {
+        course.klass.subklass.schedule.forEach(function (scheduleItem) {
+          insertScheduleItem(course, course.klass.subklass, scheduleItem)
+        })
+      }
     })
   }, 'json')
 
-
   $.get('/caches/courses.json', function (courses) {
-    availables = courses
+    cacheCourses(courses)
 
     $('#availables').html(courses.map(function (course) {
       var html = ''
@@ -56,6 +59,8 @@ $(function () {
 
       html += '</ul>'
       html += '</li>'
+
+      return html
     }).join(''))
   }, 'json')
 
@@ -63,9 +68,46 @@ $(function () {
     $(this).parent().toggleClass('expanded')
   })
 
-  function insertScheduleItem (course, klass, scheduleItem) {
+  $('#availables').on('mouseenter', 'li[data-course][data-klass]', function () {
+    var $this = $(this)
+
+    var _course = $this.data('course')
+      , _klass = $this.data('klass')
+      , _subklass = $this.data('subklass')
+
+    var course = availables[_course]
+    var klass = course.klasses[_klass]
+
+    klass.schedule.forEach(function (scheduleItem) {
+      insertScheduleItem(course, klass, scheduleItem, true)
+    })
+
+    if (klass.subklasses && _subklass) {
+      var subklass = klass.subklasses[_subklass]
+      subklass.schedule.forEach(function (scheduleItem) {
+        insertScheduleItem(course, subklass, scheduleItem, true)
+      })
+    }
+  })
+
+  $('#availables').on('mouseleave', 'li[data-course][data-klass]', function () {
+    var $this = $(this)
+
+    var _course = $this.data('course')
+      , _klass = $this.data('klass')
+
+    $('#schedule').find('li[data-pending]').remove()
+  })
+
+  function insertScheduleItem (course, klass, scheduleItem, pending) {
     var html = ''
-    html += '<li style="background:' + color(course.name) + '" title="' + course.name + '">'
+    html += '<li'
+              + ' style="background:' + color(course.name) + '"'
+              + ' title="' + course.name + '"'
+              + ' data-course="' + course.code + '"'
+              + ' data-klass="' + klass.code + '"'
+              + (pending ? ' data-pending="pending"' : '')
+              + '>'
     html += '<h3>' + course.name + '</h3>'
     html += '<p class="details">'
     html += '<span class="class">' + klass.code + '</span>'
@@ -122,4 +164,31 @@ $(function () {
     $('#schedule table').find('[data-time="' + scheduleItem.time.which + '"] [data-day="' + scheduleItem.week.day + '"] ul').append(html)
   }
 
+  var availables = {}
+  function cacheCourses (courses) {
+    // 展开并缓存课程列表
+    courses.forEach(function (course) {
+      course = _.clone(course)
+
+      var klasses = course.klasses
+      course.klasses = {}
+
+      klasses.forEach(function (klass) {
+        klass = _.clone(klass)
+
+        if (klass.subklasses) {
+          var subklasses = klass.subklasses
+          klass.subklasses = {}
+
+          subklasses.forEach(function (subklass) {
+            klass.subklasses[subklass.code] = subklass
+          })
+        }
+
+        course.klasses[klass.code] = klass
+      })
+
+      availables[course.code] = course
+    })
+  }
 })

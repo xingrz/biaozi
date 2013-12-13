@@ -19,14 +19,14 @@ sise.courses(function (err, courses) {
       return
     }
 
-    sise.course(courses[i].id, function (err, classes) {
+    sise.klasses(courses[i].id, function (err, klasses) {
       if (err) {
         return error(err.stack || err)
       }
 
-      console.log('- %s ... %s', courses[i].name, classes.length)
+      console.log('- %s ... %s', courses[i].name, klasses.length)
 
-      courses[i].classes = classes
+      courses[i].klasses = klasses
       recurse(i - 1)
     })
   })(courses.length - 1)
