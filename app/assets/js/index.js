@@ -3,9 +3,7 @@ $(function () {
   // caches
   var Availables = {}
   var Schedule = []
-
-  window.Schedule = Schedule
-  window.Schedule = Schedule
+  var Calendar = []
 
   for (var time = 0; time < 8; time++) {
     Schedule[time] = []
@@ -17,6 +15,7 @@ $(function () {
   var ep = new EventProxy
 
   ep.all('calendar', function (calendar) {
+    Calendar = calendar
     calendar.forEach(function (course) {
       course.klass.schedule.forEach(function (scheduleItem) {
         insertScheduleItem(course, course.klass, scheduleItem)
@@ -78,8 +77,16 @@ $(function () {
     }).join(''))
   })
 
-  ep.all('courses', 'confirmed', function (courses, confirmed) {
+  ep.all('courses', 'confirmed', 'calendar', function (courses, confirmed, calendar) {
+    var selectedKlasses = calendar.map(function (course) {
+      return course.klass.code
+    })
+
     courses.forEach(function (course) {
+      var selected = course.klasses.some(function (klass) {
+        return ~selectedKlasses.indexOf(klass.code)
+      })
+
       if (~confirmed.indexOf(course.code)) {
         $('#availables > li[data-course="' + course.code + '"]').hide()
       }
@@ -120,6 +127,10 @@ $(function () {
 
   $('#availables').on('mouseenter', 'li.selectable[data-course][data-klass]', function () {
     var $this = $(this)
+
+    if ($this.hasClass('lock') || $this.hasClass('fav')) {
+      return
+    }
 
     var _course = $this.data('course')
       , _klass = $this.data('klass')
@@ -294,8 +305,16 @@ $(function () {
       }
     })
   }
-window._conflit = {}
+
   function isConflit (klass) {
+    var selected = Calendar.some(function (course) {
+      return course.klass.code == klass.code
+    })
+
+    if (selected) {
+      return false
+    }
+
     return klass.schedule.some(function (item) {
       var weeks = []
       for (var i = 0; i < 20; i++) {
@@ -311,8 +330,6 @@ window._conflit = {}
           weeks[w - 1] = true
         }
       }
-
-      window._conflit[klass.code] = weeks
 
       return weeks.some(function (used, w) {
         return used && Schedule[item.time.which][item.week.day][w]
