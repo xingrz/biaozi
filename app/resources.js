@@ -13,8 +13,11 @@ module.exports = function (app) {
     .post('/signin'   , ensureNotLoggedIn, index.authenticate)
 
   var calendarApi = require('../routes/api/calendar')
-  app.get('/api/calendar',  ensureLoggedIn,   calendarApi.show)
-    .post('/api/calendar',  ensureLoggedIn,   calendarApi.create)
+  app.get('/api/calendar',  ensureLoggedIn, calendarApi.show)
+    .post('/api/calendar',  ensureLoggedIn, calendarApi.create)
+
+  var confirmedApi = require('../routes/api/confirmed')
+  app.get('/api/confirmed', ensureLoggedIn, confirmedApi.show)
 
   // serves stylus compiled css
   var stylus = require('stylus')

@@ -6,7 +6,7 @@ var caches = join(__dirname, './public/caches/courses.json')
 
 sise.courses(function (err, courses) {
   if (err) {
-    return error(err.stack || err)
+    return error(err)
   }
 
   console.log('fetched %s courses', courses.length)
@@ -21,13 +21,24 @@ sise.courses(function (err, courses) {
 
     sise.klasses(courses[i].id, function (err, klasses) {
       if (err) {
-        return error(err.stack || err)
+        return error(err)
       }
 
-      console.log('- %s ... %s', courses[i].name, klasses.length)
+      sise.requirements(courses[i].id, function (err, requirements) {
+        if (err) {
+          return error(err)
+        }
 
-      courses[i].klasses = klasses
-      recurse(i - 1)
+        console.log('- %s ... %s', courses[i].name, klasses.length)
+
+        courses[i].klasses = klasses
+
+        if (requirements) {
+          courses[i].requirements = requirements
+        }
+
+        recurse(i - 1)
+      })
     })
   })(courses.length - 1)
 })

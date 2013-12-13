@@ -30,7 +30,7 @@ $(function () {
     $('#availables').html(courses.map(function (course) {
       var html = ''
 
-      html += '<li>'
+      html += '<li data-course="' + course.code + '">'
       html += '<strong>' + course.name + '</strong>'
       html += '<ul>'
 
@@ -62,6 +62,27 @@ $(function () {
 
       return html
     }).join(''))
+
+
+    $.get('/api/confirmed', function (confirmed) {
+      courses.forEach(function (course) {
+        if (~confirmed.indexOf(course.code)) {
+          $('#availables > li[data-course="' + course.code + '"]').hide()
+        }
+
+        if (course.requirements) {
+          var met = course.requirements.some(function (or) {
+            return or.every(function (and) {
+              return ~confirmed.indexOf(and)
+            })
+          })
+
+          if (!met) {
+            $('#availables > li[data-course="' + course.code + '"]').addClass('not-met')
+          }
+        }
+      })
+    })
   }, 'json')
 
   $('#availables').on('click', '> li > strong', function () {

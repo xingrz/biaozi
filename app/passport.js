@@ -31,15 +31,15 @@ module.exports = function (app) {
         sise.login(username, password, ep.done('login'))
       })
 
-      ep.once('login', function (jar) {
-        if (!jar) {
+      ep.once('login', function (login) {
+        if (!login) {
           return done(null, false)
         }
 
-        req.session.jar = jar
+        req.session.jar = login.jar
 
         db.User
-          .findOrCreate({ username: username }, {})
+          .findOrCreate({ username: username }, { key: login.key })
           .complete(done)
       })
 

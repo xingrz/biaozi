@@ -17,6 +17,15 @@ h2 {
   list-style none
   margin 0
   padding 0
+
+  > li.not-met > strong {
+    text-decoration line-through
+    color rgba(255, 255, 255, 0.2)
+  }
+
+  &.hide-not-met > li.not-met {
+    display none
+  }
 }
 
 #availables > li {
