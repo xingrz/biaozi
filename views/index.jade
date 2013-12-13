@@ -14,6 +14,7 @@ html
 
     script(src='//cdn.staticfile.org/jquery/2.0.3/jquery.min.js')
     script(src='//cdn.staticfile.org/underscore.js/1.5.2/underscore-min.js')
+    script(src='/assets/js/eventproxy.js')
     script(src='/assets/js/index.js')
 
   body
@@ -26,7 +27,7 @@ html
         | &nbsp;
         a(href='/signout') 注销
 
-    ul#availables.palette-peter-river
+    ul#availables.palette-peter-river.hide-not-met.hide-all-conflit
 
     div#schedule
       table

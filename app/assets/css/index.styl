@@ -26,6 +26,15 @@ h2 {
   &.hide-not-met > li.not-met {
     display none
   }
+
+  > li.all-conflit > strong {
+    text-decoration line-through
+    color rgba(255, 255, 255, 0.2)
+  }
+
+  &.hide-all-conflit > li.all-conflit {
+    display none
+  }
 }
 
 #availables > li {
@@ -106,6 +115,10 @@ h2 {
 
     &:hover {
       color rgba(255, 255, 255, 1.0)
+    }
+
+    &.conflit {
+      text-decoration line-through
     }
   }
 }

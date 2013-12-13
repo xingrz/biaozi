@@ -7,7 +7,7 @@ exports.create = function (req, res, error) {
 }
 
 exports.show = function (req, res, error) {
-  sise.calendar(req.session.jar, 2012, 2, function (err, calendar) {
+  sise.calendar(req.session.jar, 2013, 2, function (err, calendar) {
     if (err) {
       return error(err)
     }
