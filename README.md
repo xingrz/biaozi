@@ -12,7 +12,7 @@ $ npm install
 ## 调试
 
 ```
-$ nodemon .
+$ DEBUG=@:* nodemon .
 ```
 
 ## 上线
