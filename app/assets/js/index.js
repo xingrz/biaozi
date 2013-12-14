@@ -21,7 +21,8 @@ $(function () {
       var html = ''
 
       html += '<li class="course" data-course="' + course.code + '">'
-      html += '<strong>' + course.name + '</strong>'
+      html += '<strong>' + course.name
+              + '<p><span class="code">' + course.code + '</span> / <span class="credit">' + course.credit.toFixed(1) + '</span></p></strong>'
       html += '<ul>'
 
       course.klasses.forEach(function (klass) {
