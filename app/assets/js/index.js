@@ -20,33 +20,57 @@ $(function () {
     Availables = courses
 
     courses.forEach(function (course) {
-      var $course = $('<li class="course" data-course="' + course.code + '" />')
-        , $name = $('<strong>' + course.name + '</strong>').appendTo($course)
-        , $details = $('<p />').appendTo($name)
+      var h = Math.random() * 180 + Math.random() * 180
+        , s = Math.random() * 30 + 20
+        , l = Math.random() * 30 + 30
 
-      $('<span class="code">' + course.code + '</span> /').appendTo($details)
-      $(' <span class="credit">' + course.credit.toFixed(1) + '</span>').appendTo($details)
+      course.color = 'hsl(' + h + ',' + s + '%,' + l + '%)'
+    })
+
+    courses.forEach(function (course) {
+      var $course = $('<li />')
+                    .addClass('course')
+                    .attr('course', course.code)
+                    .appendTo($availables)
+
+      var $name   = $('<strong>' + course.name + '</strong>')
+                    .appendTo($course)
+
+      $('<p><span class="code">' + course.code + '</span> / <span class="credit">' + course.credit.toFixed(1) + '</span></p>')
+      .appendTo($name)
 
       var $klasses = $('<ul />').appendTo($course)
 
       course.klasses.forEach(function (klass) {
         if (klass.subklasses) {
-          var $klass = $('<li class="klass" data-klass="' + klass.code + '">' + klass.code + '</li>').appendTo($klasses)
-            , $subklasses = $('<ul />').appendTo($klass)
+          var $klass  = $('<li>' + klass.code + '</li>')
+                        .addClass('klass')
+                        .attr('klass', klass.code)
+                        .appendTo($klasses)
+
+          var $subklasses = $('<ul />').appendTo($klass)
 
           klass.subklasses.forEach(function (subklass) {
-            var $subklass = $('<li class="subklass selectable" data-subklass="' + subklass.code + '">' + subklass.code + '</li>').appendTo($subklasses)
+            var $subklass = $('<li>' + subklass.code + '</li>')
+                            .addClass('selectable')
+                            .addClass('subklass')
+                            .attr('subklass', subklass.code)
+                            .appendTo($subklasses)
+
             $(' <a class="fui-heart"></a>').appendTo($subklass)
             $(' <a class="fui-check"></a>').appendTo($subklass)
           })
         } else {
-          var $klass = $('<li class="klass selectable" data-klass="' + klass.code + '">' + klass.code + '</li>').appendTo($klasses)
+          var $klass  = $('<li>' + klass.code + '</li>')
+                        .addClass('selectable')
+                        .addClass('klass')
+                        .attr('klass', klass.code)
+                        .appendTo($klasses)
+
           $(' <a class="fui-heart"></a>').appendTo($klass)
           $(' <a class="fui-check"></a>').appendTo($klass)
         }
       })
-
-      $course.appendTo($availables)
     })
   })
 
@@ -77,23 +101,24 @@ $(function () {
     })
   })
 
-  ep.all('courses', 'confirmed', 'calendar', function (courses, confirmed, calendar) {
+  ep.all('courses', 'confirmed', 'calendar',
+  function (courses, confirmed, calendar) {
     courses.forEach(function (course) {
       // 标记已选
       var selected = _.find(calendar, { code: course.code })
       if (selected) {
         var $course = $availables
-                      .find('.course[data-course="' + course.code + '"]')
-                      .css('background', color(course.name))
+                      .find('[course="' + course.code + '"]')
+                      .css('background', course.color)
                       .addClass(selected.status)
 
         var $klass = $course
-                     .find('.klass[data-klass="' + selected.klass + '"]')
+                     .find('[klass="' + selected.klass + '"]')
                      .addClass(selected.status)
 
         if (selected.subklass) {
           $klass
-          .find('.subklass[data-subklass="' + selected.subklass + '"]')
+          .find('[subklass="' + selected.subklass + '"]')
           .addClass(selected.status)
         }
 
@@ -103,7 +128,7 @@ $(function () {
       // 隐藏已修
       if (_.contains(confirmed, course.code)) {
         $availables
-        .find('.course[data-course="' + course.code + '"]')
+        .find('[course="' + course.code + '"]')
         .hide()
       }
 
@@ -117,7 +142,7 @@ $(function () {
 
         if (!met) {
           $availables
-          .find('.course[data-course="' + course.code + '"]')
+          .find('[course="' + course.code + '"]')
           .addClass('not-met')
         }
       }
@@ -151,9 +176,9 @@ $(function () {
       return
     }
 
-    var _subklass = $this.data('subklass')
-      , _klass = (_subklass ? $this.parents('.klass') : $this).data('klass')
-      , _course = $this.parents('.course').data('course')
+    var _subklass = $this.attr('subklass')
+      , _klass = (_subklass ? $this.parents('[klass]') : $this).attr('klass')
+      , _course = $this.parents('[course]').attr('course')
 
     var course = _.find(Availables, { code: _course })
     var klass = _.find(course.klasses, { code: _klass })
@@ -174,20 +199,10 @@ $(function () {
     $('#schedule').find('.preview').remove()
   })
 
-  var colorOfName = {}
-  function color (name) {
-    if (colorOfName[name]) return colorOfName[name]
-    var r = Math.floor(Math.random() * 0xef) + 0x10
-    var g = Math.floor(Math.random() * 0xef) + 0x10
-    var b = Math.floor(0xff - (r + g) / 2) + 0x10
-    colorOfName[name] = '#' + r.toString(16) + g.toString(16) + b.toString(16)
-    return colorOfName[name]
-  }
-
   function insertScheduleItem (course, klass, scheduleItem, preview) {
     var html = ''
     html += '<li'
-              + ' style="background:' + color(course.name) + '"'
+              + ' style="background:' + course.color + '"'
               + ' title="' + course.name + '"'
               + ' data-course="' + course.code + '"'
               + ' data-klass="' + klass.code + '"'
@@ -253,13 +268,13 @@ $(function () {
   function processConflits () {
     Availables.forEach(function (course) {
       var $course = $availables
-                    .find('.course[data-course="' + course.code + '"]')
+                    .find('[course="' + course.code + '"]')
 
       var hasKlass = false
 
       course.klasses.forEach(function (klass) {
         var $klass = $course
-                     .find('.klass[data-klass="' + klass.code + '"]')
+                     .find('[klass="' + klass.code + '"]')
 
         var klassConflit = isConflit(klass)
         if (klassConflit) {
@@ -271,7 +286,7 @@ $(function () {
 
           klass.subklasses.forEach(function (subklass) {
             var $subklass = $klass
-                            .find('.subklass[data-subklass="' + subklass.code + '"]')
+                            .find('[subklass="' + subklass.code + '"]')
 
             var subklassConflit = isConflit(subklass)
             if (subklassConflit) {
