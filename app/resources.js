@@ -14,7 +14,6 @@ module.exports = function (app) {
 
   var calendarApi = require('../routes/api/calendar')
   app.get('/api/calendar',  ensureLoggedIn, calendarApi.show)
-    .post('/api/calendar',  ensureLoggedIn, calendarApi.create)
 
   var confirmedApi = require('../routes/api/confirmed')
   app.get('/api/confirmed', ensureLoggedIn, confirmedApi.show)

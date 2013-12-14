@@ -3,7 +3,7 @@ $(function () {
   // caches
   var Availables = {}
   var Schedule = []
-  var Calendar = []
+  var Confirmed = []
 
   for (var time = 0; time < 8; time++) {
     Schedule[time] = []
@@ -13,21 +13,6 @@ $(function () {
   }
 
   var ep = new EventProxy
-
-  ep.all('calendar', function (calendar) {
-    Calendar = calendar
-    calendar.forEach(function (course) {
-      course.klass.schedule.forEach(function (scheduleItem) {
-        insertScheduleItem(course, course.klass, scheduleItem)
-      })
-
-      if (course.klass.subklass) {
-        course.klass.subklass.schedule.forEach(function (scheduleItem) {
-          insertScheduleItem(course, course.klass.subklass, scheduleItem)
-        })
-      }
-    })
-  })
 
   ep.all('courses', function (courses) {
     cacheCourses(courses)
@@ -77,15 +62,68 @@ $(function () {
     }).join(''))
   })
 
+  ep.all('calendar', 'courses', function (confirmed) {
+    Confirmed = confirmed
+    confirmed.forEach(function (item) {
+      var course = Availables[item.code]
+      if (!course) {
+        return
+      }
+
+      var klass = course.klasses[item.klass]
+      if (!klass) {
+        return
+      }
+
+      klass.schedule.forEach(function (scheduleItem) {
+        insertScheduleItem(course, klass, scheduleItem)
+      })
+
+      if (klass.subklasses && item.subklass) {
+        var subklass = klass.subklasses[item.subklass]
+        subklass.schedule.forEach(function (scheduleItem) {
+          insertScheduleItem(course, subklass, scheduleItem)
+        })
+      }
+    })
+  })
+
   ep.all('courses', 'confirmed', 'calendar', function (courses, confirmed, calendar) {
-    var selectedKlasses = calendar.map(function (course) {
-      return course.klass.code
+    var selectedCourses = calendar.map(function (item) {
+      return item.code
+    })
+
+    var selectedKlasses = calendar.map(function (item) {
+      return item.klass
+    })
+
+    var selectedSubklasses = calendar.map(function (item) {
+      return item.subklass
+    })
+
+    var selectedStatuses = calendar.map(function (item) {
+      return item.status
     })
 
     courses.forEach(function (course) {
-      var selected = course.klasses.some(function (klass) {
-        return ~selectedKlasses.indexOf(klass.code)
-      })
+      var selected = selectedCourses.indexOf(course.code)
+      if (~selected) {
+        var klass = selectedKlasses[selected]
+          , subklass = selectedSubklasses[selected]
+          , status = selectedStatuses[selected]
+
+        $('#availables > li[data-course="' + course.code + '"]')
+          .css('background', color(course.name))
+          .addClass(status)
+
+        if (subklass) {
+          $('#availables li.subklass[data-course="' + course.code + '"][data-subklass="' + subklass + '"]').addClass(status)
+        } else {
+          $('#availables li.klass[data-course="' + course.code + '"][data-klass="' + klass + '"]').addClass(status)
+        }
+
+        return
+      }
 
       if (~confirmed.indexOf(course.code)) {
         $('#availables > li[data-course="' + course.code + '"]').hide()
@@ -128,7 +166,7 @@ $(function () {
   $('#availables').on('mouseenter', 'li.selectable[data-course][data-klass]', function () {
     var $this = $(this)
 
-    if ($this.hasClass('lock') || $this.hasClass('fav')) {
+    if ($this.hasClass('confirmed') || $this.hasClass('locked') || $this.hasClass('favored')) {
       return
     }
 
@@ -295,7 +333,7 @@ $(function () {
           }
         }
 
-        if (!klassConflit && hasSubklass) {
+        if (!klassConflit && (hasSubklass || !klass.subklasses)) {
           hasKlass = true
         }
       })
@@ -307,11 +345,12 @@ $(function () {
   }
 
   function isConflit (klass) {
-    var selected = Calendar.some(function (course) {
-      return course.klass.code == klass.code
+    var selected = Confirmed.some(function (course) {
+      return course.klass == klass.code
     })
 
     if (selected) {
+      console.log(klass)
       return false
     }
 
