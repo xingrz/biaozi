@@ -5,7 +5,8 @@
 , "description": ""
 , "main": "server.js"
 , "dependencies": {
-    "cheerio": "latest"
+    "async": "latest"
+  , "cheerio": "latest"
   , "connect-ensure-login": "latest"
   , "connect-redis": "latest"
   , "debug": "latest"
@@ -20,7 +21,7 @@
   , "request": "2.X"
   , "sequelize": "2.X"
   , "stylus": "latest"
-  , "underscore": "latest"
+  , "lodash": "latest"
   }
 , "devDependencies": {
     "mocha": "latest"

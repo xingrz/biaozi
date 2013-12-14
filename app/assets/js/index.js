@@ -318,8 +318,8 @@ $(function () {
   }
 
   function isConflit (klass) {
-    if (_.contains(Confirmed, { klass: klass.code }) ||
-        _.contains(Confirmed, { subklass: klass.code })) {
+    if (_.find(Confirmed, { klass: klass.code }) ||
+        _.find(Confirmed, { subklass: klass.code })) {
       return false
     }
 

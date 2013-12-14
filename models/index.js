@@ -1,7 +1,7 @@
 var readdirSync = require('fs').readdirSync
   , join = require('path').join
   , Sequelize = require('sequelize')
-  , extend = require('underscore').extend
+  , extend = require('lodash').extend
 
 var config = require('../package.json').config.mysql
 if ('production' != process.env.NODE_ENV) {

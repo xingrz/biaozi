@@ -1,4 +1,6 @@
 var EventProxy = require('eventproxy')
+  , async = require('async')
+  , _ = require('lodash')
   , readFile = require('fs').readFile
   , join = require('path').join
 
@@ -19,7 +21,10 @@ exports.show = function (req, res, error) {
   })
 
   ep.once('user', function (user) {
-    user.getCalendarItems({ attributes: [ 'code', 'klass', 'subklass', 'status' ] }).complete(ep.done('calendar'))
+    debug('found user %s %s', user.id, user.key)
+    user.getCalendarItems({
+      attributes: [ 'code', 'klass', 'subklass', 'status' ]
+    }).complete(ep.done('calendar'))
   })
 
   ep.once('calendar', function (calendar) {
@@ -27,6 +32,7 @@ exports.show = function (req, res, error) {
       return res.send(200, calendar)
     }
 
+    debug('generate calendar')
     generate(req.session.jar, ep.done('generated'))
   })
 
@@ -37,10 +43,14 @@ exports.show = function (req, res, error) {
       return
     }
 
-    insert(calendar, ep.done('insert'))
+    debug('inserting %s calendar items', calendar.length)
+    async.map(calendar, function (item, next) {
+      CalendarItem.create(item).complete(next)
+    }, ep.done('insert'))
   })
 
   ep.all('user', 'insert', function (user, items) {
+    debug('inserted %s calendar items', items.length)
     user.setCalendarItems(items).complete(ep.done('save'))
   })
 
@@ -52,31 +62,12 @@ exports.show = function (req, res, error) {
   ep.emit('start')
 }
 
-function insert (calendar, callback) {
-  var ep = new EventProxy()
-
-  var items = []
-
-  !(function recurse (i) {
-    if (i < 0) {
-      return callback(null, items)
-    }
-
-    CalendarItem.create(calendar[i])
-      .success(function (item) {
-        items.push(item)
-        recurse(i - 1)
-      })
-      .error(function (err) {
-        callback(err)
-      })
-  })(calendar.length - 1)
-}
-
 function generate (jar, callback) {
   var ep = new EventProxy()
 
   ep.once('start', function () {
+    debug('loading local courses cache')
+
     var path = join(__dirname, '../../public/caches/courses.json')
     readFile(path, function (err, content) {
       if (err) {
@@ -93,6 +84,7 @@ function generate (jar, callback) {
   })
 
   ep.once('start', function () {
+    debug('fetching remote calendar')
     sise.calendar(jar, 2013, 2, ep.done('calendar'))
   })
 
@@ -102,39 +94,23 @@ function generate (jar, callback) {
       return callback(null, false)
     }
 
-    var calendar = []
+    debug('loaded %s courses, %s confirmed in calendar',
+      courses.length, confirmed.length)
 
-    var names = confirmed.map(function (course) {
-      return course.name
-    })
-
-    var klasses = confirmed.map(function (course) {
-      return course.klass.code
-    })
-
-    var subklasses = confirmed.map(function (course) {
-      return course.klass.subklass ? course.klass.subklass.code : null
-    })
-
-    courses.forEach(function (course) {
-      var index = names.indexOf(course.name)
-      if (~index) {
-        var matchKlass = course.klasses.some(function (klass) {
-          return klass.code == klasses[index]
+    callback(null, _.transform(courses, function (result, course) {
+      var confirmedItem = _.find(confirmed, { name: course.name })
+      if (confirmedItem && _.find(course.klasses,
+                                  { code: confirmedItem.klass.code })) {
+        result.push({
+          code: course.code
+        , klass: confirmedItem.klass.code
+        , subklass: ( confirmedItem.klass.subklass
+                    ? confirmedItem.klass.subklass.code
+                    : null )
+        , status: 'confirmed'
         })
-
-        if (matchKlass) {
-          calendar.push({
-            code: course.code
-          , klass: klasses[index]
-          , subklass: subklasses[index]
-          , status: 'confirmed'
-          })
-        }
       }
-    })
-
-    callback(null, calendar)
+    }))
   })
 
   ep.fail(callback)
