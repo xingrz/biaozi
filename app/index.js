@@ -35,7 +35,7 @@ app.use(express.bodyParser())
 app.use(express.cookieParser(pkg.config.cookie.secret))
 app.use(express.session({
   secret: pkg.config.cookie.secret
-, cookie: { httpOnly: true, maxAge: 1 * 60 * 60 * 1000 }
+, cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
 , store: new RedisStore({ prefix: pkg.config.redis.prefix })
 , proxy: true
 }))

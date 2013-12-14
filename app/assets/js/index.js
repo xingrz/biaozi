@@ -19,50 +19,35 @@ $(function () {
   ep.all('courses', function (courses) {
     Availables = courses
 
-    $('#availables').html(courses.map(function (course) {
-      var html = ''
+    courses.forEach(function (course) {
+      var $course = $('<li class="course" data-course="' + course.code + '" />')
+        , $name = $('<strong>' + course.name + '</strong>').appendTo($course)
+        , $details = $('<p />').appendTo($name)
 
-      html += '<li class="course" data-course="' + course.code + '">'
-      html += '<strong>' + course.name
-              + '<p><span class="code">' + course.code + '</span> / <span class="credit">' + course.credit.toFixed(1) + '</span></p></strong>'
-      html += '<ul>'
+      $('<span class="code">' + course.code + '</span> /').appendTo($details)
+      $(' <span class="credit">' + course.credit.toFixed(1) + '</span>').appendTo($details)
+
+      var $klasses = $('<ul />').appendTo($course)
 
       course.klasses.forEach(function (klass) {
         if (klass.subklasses) {
-          html += '<li'
-                    + ' class="klass"'
-                    + ' data-course="' + course.code + '"'
-                    + ' data-klass="' + klass.code + '"'
-                    + '>'
-                    + klass.code
-                    + '<ul>'
+          var $klass = $('<li class="klass" data-klass="' + klass.code + '">' + klass.code + '</li>').appendTo($klasses)
+            , $subklasses = $('<ul />').appendTo($klass)
+
           klass.subklasses.forEach(function (subklass) {
-            html += '<li'
-                      + ' class="subklass selectable"'
-                      + ' data-course="' + course.code + '"'
-                      + ' data-klass="' + klass.code + '"'
-                      + ' data-subklass="' + subklass.code + '"'
-                      + '>'
-                      + subklass.code
-                      + ' <a class="fui-heart"></a> <a class="fui-lock"></a></li>'
+            var $subklass = $('<li class="subklass selectable" data-subklass="' + subklass.code + '">' + subklass.code + '</li>').appendTo($subklasses)
+            $(' <a class="fui-heart"></a>').appendTo($subklass)
+            $(' <a class="fui-check"></a>').appendTo($subklass)
           })
-          html += '</ul></li>'
         } else {
-          html += '<li'
-                    + ' class="klass selectable"'
-                    + ' data-course="' + course.code + '"'
-                    + ' data-klass="' + klass.code + '"'
-                    + '>'
-                    + klass.code
-                    + ' <a class="fui-heart"></a> <a class="fui-lock"></a></li>'
+          var $klass = $('<li class="klass selectable" data-klass="' + klass.code + '">' + klass.code + '</li>').appendTo($klasses)
+          $(' <a class="fui-heart"></a>').appendTo($klass)
+          $(' <a class="fui-check"></a>').appendTo($klass)
         }
       })
 
-      html += '</ul>'
-      html += '</li>'
-
-      return html
-    }).join(''))
+      $course.appendTo($availables)
+    })
   })
 
   ep.all('calendar', 'courses', function (confirmed) {
@@ -159,16 +144,16 @@ $(function () {
     $(this).parent().toggleClass('expanded')
   })
 
-  $availables.on('mouseenter', '.selectable[data-course][data-klass]', function () {
+  $availables.on('mouseenter', '.selectable', function () {
     var $this = $(this)
 
     if ($this.hasClass('confirmed') || $this.hasClass('locked') || $this.hasClass('favored')) {
       return
     }
 
-    var _course = $this.data('course')
-      , _klass = $this.data('klass')
-      , _subklass = $this.data('subklass')
+    var _subklass = $this.data('subklass')
+      , _klass = (_subklass ? $this.parents('.klass') : $this).data('klass')
+      , _course = $this.parents('.course').data('course')
 
     var course = _.find(Availables, { code: _course })
     var klass = _.find(course.klasses, { code: _klass })
@@ -185,12 +170,7 @@ $(function () {
     }
   })
 
-  $availables.on('mouseleave', '.selectable[data-course][data-klass]', function () {
-    var $this = $(this)
-
-    var _course = $this.data('course')
-      , _klass = $this.data('klass')
-
+  $availables.on('mouseleave', '.selectable', function () {
     $('#schedule').find('.preview').remove()
   })
 

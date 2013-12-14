@@ -3,7 +3,7 @@ module.exports = function (seq, T) {
     code    : { type: T.STRING }
   , klass   : { type: T.STRING }
   , subklass: { type: T.STRING }
-  , status  : { type: T.ENUM, values: ['confirmed', 'locked', 'favored'] }
+  , status  : { type: T.ENUM, values: ['confirmed', 'favored'] }
   }, {
     associate: function (models) {
       CalendarItem.belongsTo(models.User)
