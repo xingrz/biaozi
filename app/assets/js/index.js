@@ -119,9 +119,9 @@ $(function () {
 
         if (subklass) {
           $('#availables li.subklass[data-course="' + course.code + '"][data-subklass="' + subklass + '"]').addClass(status)
-        } else {
-          $('#availables li.klass[data-course="' + course.code + '"][data-klass="' + klass + '"]').addClass(status)
         }
+
+        $('#availables li.klass[data-course="' + course.code + '"][data-klass="' + klass + '"]').addClass(status)
 
         return
       }
@@ -347,11 +347,10 @@ $(function () {
 
   function isConflit (klass) {
     var selected = Confirmed.some(function (course) {
-      return course.klass == klass.code
+      return course.klass == klass.code || course.subklass == klass.code
     })
 
     if (selected) {
-      console.log(klass)
       return false
     }
 
