@@ -20,14 +20,6 @@ $(function () {
     Availables = courses
 
     courses.forEach(function (course) {
-      var h = Math.random() * 180 + Math.random() * 180
-        , s = Math.random() * 30 + 20
-        , l = Math.random() * 30 + 30
-
-      course.color = 'hsl(' + h + ',' + s + '%,' + l + '%)'
-    })
-
-    courses.forEach(function (course) {
       var $course = $('<li />')
                     .addClass('course')
                     .attr('course', course.code)
@@ -200,6 +192,14 @@ $(function () {
   })
 
   function insertScheduleItem (course, klass, scheduleItem, preview) {
+    if (!course.color) {
+      var h = Math.random() * 180 + Math.random() * 180
+        , s = Math.random() * 30 + 20
+        , l = Math.random() * 30 + 30
+
+      course.color = 'hsl(' + h + ',' + s + '%,' + l + '%)'
+    }
+
     var html = ''
     html += '<li'
               + ' style="background:' + course.color + '"'
