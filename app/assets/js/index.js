@@ -1,7 +1,7 @@
 $(function () {
 
   // caches
-  var Availables = {}
+  var Availables = []
   var Schedule = []
   var Confirmed = []
 
@@ -12,10 +12,12 @@ $(function () {
     }
   }
 
+  $availables = $('#availables')
+
   var ep = new EventProxy
 
   ep.all('courses', function (courses) {
-    cacheCourses(courses)
+    Availables = courses
 
     $('#availables').html(courses.map(function (course) {
       var html = ''
@@ -66,12 +68,13 @@ $(function () {
   ep.all('calendar', 'courses', function (confirmed) {
     Confirmed = confirmed
     confirmed.forEach(function (item) {
-      var course = Availables[item.code]
+      var course = _.find(Availables, { code: item.code })
+
       if (!course) {
         return
       }
 
-      var klass = course.klasses[item.klass]
+      var klass = _.find(course.klasses, { code: item.klass })
       if (!klass) {
         return
       }
@@ -81,7 +84,7 @@ $(function () {
       })
 
       if (klass.subklasses && item.subklass) {
-        var subklass = klass.subklasses[item.subklass]
+        var subklass = _.find(klass.subklasses, { code: item.subklass })
         subklass.schedule.forEach(function (scheduleItem) {
           insertScheduleItem(course, subklass, scheduleItem)
         })
@@ -90,62 +93,54 @@ $(function () {
   })
 
   ep.all('courses', 'confirmed', 'calendar', function (courses, confirmed, calendar) {
-    var selectedCourses = calendar.map(function (item) {
-      return item.code
-    })
-
-    var selectedKlasses = calendar.map(function (item) {
-      return item.klass
-    })
-
-    var selectedSubklasses = calendar.map(function (item) {
-      return item.subklass
-    })
-
-    var selectedStatuses = calendar.map(function (item) {
-      return item.status
-    })
-
     courses.forEach(function (course) {
-      var selected = selectedCourses.indexOf(course.code)
-      if (~selected) {
-        var klass = selectedKlasses[selected]
-          , subklass = selectedSubklasses[selected]
-          , status = selectedStatuses[selected]
+      // 标记已选
+      var selected = _.find(calendar, { code: course.code })
+      if (selected) {
+        var $course = $availables
+                      .find('.course[data-course="' + course.code + '"]')
+                      .css('background', color(course.name))
+                      .addClass(selected.status)
 
-        $('#availables > li[data-course="' + course.code + '"]')
-          .css('background', color(course.name))
-          .addClass(status)
+        var $klass = $course
+                     .find('.klass[data-klass="' + selected.klass + '"]')
+                     .addClass(selected.status)
 
-        if (subklass) {
-          $('#availables li.subklass[data-course="' + course.code + '"][data-subklass="' + subklass + '"]').addClass(status)
+        if (selected.subklass) {
+          $klass
+          .find('.subklass[data-subklass="' + selected.subklass + '"]')
+          .addClass(selected.status)
         }
-
-        $('#availables li.klass[data-course="' + course.code + '"][data-klass="' + klass + '"]').addClass(status)
 
         return
       }
 
-      if (~confirmed.indexOf(course.code)) {
-        $('#availables > li[data-course="' + course.code + '"]').hide()
+      // 隐藏已修
+      if (_.contains(confirmed, course.code)) {
+        $availables
+        .find('.course[data-course="' + course.code + '"]')
+        .hide()
       }
 
+      // 标记不符合
       if (course.requirements) {
-        var met = course.requirements.some(function (or) {
-          return or.every(function (and) {
-            return ~confirmed.indexOf(and)
+        var met = _.some(course.requirements, function (or) {
+          return _.every(or, function (and) {
+            return _.contains(confirmed, and)
           })
         })
 
         if (!met) {
-          $('#availables > li[data-course="' + course.code + '"]').addClass('not-met')
+          $availables
+          .find('.course[data-course="' + course.code + '"]')
+          .addClass('not-met')
         }
       }
     })
   })
 
   ep.all('calendar', 'courses', function () {
-    compareSchedules()
+    processConflits()
   })
 
   $.get('/api/calendar', function (calendar) {
@@ -158,13 +153,13 @@ $(function () {
 
   $.get('/api/confirmed', function (confirmed) {
     ep.emit('confirmed', confirmed)
-  })
+  }, 'json')
 
-  $('#availables').on('click', '> li > strong', function () {
+  $availables.on('click', '> li > strong', function () {
     $(this).parent().toggleClass('expanded')
   })
 
-  $('#availables').on('mouseenter', 'li.selectable[data-course][data-klass]', function () {
+  $availables.on('mouseenter', '.selectable[data-course][data-klass]', function () {
     var $this = $(this)
 
     if ($this.hasClass('confirmed') || $this.hasClass('locked') || $this.hasClass('favored')) {
@@ -175,28 +170,28 @@ $(function () {
       , _klass = $this.data('klass')
       , _subklass = $this.data('subklass')
 
-    var course = Availables[_course]
-    var klass = course.klasses[_klass]
+    var course = _.find(Availables, { code: _course })
+    var klass = _.find(course.klasses, { code: _klass })
 
     klass.schedule.forEach(function (scheduleItem) {
       insertScheduleItem(course, klass, scheduleItem, true)
     })
 
     if (klass.subklasses && _subklass) {
-      var subklass = klass.subklasses[_subklass]
+      var subklass = _.find(klass.subklasses, { code: _subklass })
       subklass.schedule.forEach(function (scheduleItem) {
         insertScheduleItem(course, subklass, scheduleItem, true)
       })
     }
   })
 
-  $('#availables').on('mouseleave', 'li.selectable[data-course][data-klass]', function () {
+  $availables.on('mouseleave', '.selectable[data-course][data-klass]', function () {
     var $this = $(this)
 
     var _course = $this.data('course')
       , _klass = $this.data('klass')
 
-    $('#schedule').find('li[data-pending]').remove()
+    $('#schedule').find('.preview').remove()
   })
 
   var colorOfName = {}
@@ -209,14 +204,14 @@ $(function () {
     return colorOfName[name]
   }
 
-  function insertScheduleItem (course, klass, scheduleItem, pending) {
+  function insertScheduleItem (course, klass, scheduleItem, preview) {
     var html = ''
     html += '<li'
               + ' style="background:' + color(course.name) + '"'
               + ' title="' + course.name + '"'
               + ' data-course="' + course.code + '"'
               + ' data-klass="' + klass.code + '"'
-              + (pending ? ' data-pending="pending"' : '')
+              + (preview ? ' class="preview twinkling"' : '')
               + '>'
     html += '<h3>' + course.name + '</h3>'
     html += '<p class="details">'
@@ -274,63 +269,40 @@ $(function () {
     $('#schedule table').find('[data-time="' + scheduleItem.time.which + '"] [data-day="' + scheduleItem.week.day + '"] ul').append(html)
   }
 
-  function cacheCourses (courses) {
-    // 展开并缓存课程列表
-    courses.forEach(function (course) {
-      course = _.clone(course)
 
-      var klasses = course.klasses
-      course.klasses = {}
-
-      klasses.forEach(function (klass) {
-        klass = _.clone(klass)
-
-        if (klass.subklasses) {
-          var subklasses = klass.subklasses
-          klass.subklasses = {}
-
-          subklasses.forEach(function (subklass) {
-            klass.subklasses[subklass.code] = subklass
-          })
-        }
-
-        course.klasses[klass.code] = klass
-      })
-
-      Availables[course.code] = course
-    })
-  }
-
-  function compareSchedules () {
-    Object.keys(Availables).forEach(function (_course) {
-      var course = Availables[_course]
+  function processConflits () {
+    Availables.forEach(function (course) {
+      var $course = $availables
+                    .find('.course[data-course="' + course.code + '"]')
 
       var hasKlass = false
 
-      Object.keys(course.klasses).forEach(function (_klass) {
-        var klass = course.klasses[_klass]
+      course.klasses.forEach(function (klass) {
+        var $klass = $course
+                     .find('.klass[data-klass="' + klass.code + '"]')
 
         var klassConflit = isConflit(klass)
         if (klassConflit) {
-          $('#availables li.klass[data-course="' + course.code + '"][data-klass="' + klass.code + '"]').addClass('conflit')
+          $klass.addClass('conflit')
         }
 
         if (klass.subklasses) {
           var hasSubklass = false
 
-          Object.keys(klass.subklasses).forEach(function (_subklass) {
-            var subklass = klass.subklasses[_subklass]
+          klass.subklasses.forEach(function (subklass) {
+            var $subklass = $klass
+                            .find('.subklass[data-subklass="' + subklass.code + '"]')
 
             var subklassConflit = isConflit(subklass)
             if (subklassConflit) {
-              $('#availables li.subklass[data-course="' + course.code + '"][data-subklass="' + subklass.code + '"]').addClass('conflit')
+              $subklass.addClass('conflit')
             } else {
               hasSubklass = true
             }
           })
 
           if (!hasSubklass) {
-            $('#availables li.klass[data-course="' + course.code + '"][data-klass="' + klass.code + '"]').addClass('conflit')
+            $klass.addClass('conflit')
           }
         }
 
@@ -340,17 +312,14 @@ $(function () {
       })
 
       if (!hasKlass) {
-        $('#availables > li[data-course="' + course.code + '"]').addClass('all-conflit')
+        $course.addClass('all-conflit')
       }
     })
   }
 
   function isConflit (klass) {
-    var selected = Confirmed.some(function (course) {
-      return course.klass == klass.code || course.subklass == klass.code
-    })
-
-    if (selected) {
+    if (_.contains(Confirmed, { klass: klass.code }) ||
+        _.contains(Confirmed, { subklass: klass.code })) {
       return false
     }
 
