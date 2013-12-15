@@ -30,7 +30,7 @@ install:
 	@npm install
 
 debug:
-	@NODE_ENV=development supervisor server
+	@NODE_ENV=development DEBUG=@:* nodemon
 
 start: install
 	@NODE_ENV=production node server

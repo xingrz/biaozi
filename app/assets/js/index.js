@@ -13,6 +13,7 @@ $(function () {
   }
 
   $availables = $('#availables')
+  $schedule   = $('#schedule table')
 
   var ep = new EventProxy
 
@@ -49,8 +50,8 @@ $(function () {
                             .attr('subklass', subklass.code)
                             .appendTo($subklasses)
 
-            $(' <a class="fui-heart"></a>').appendTo($subklass)
             $(' <a class="fui-check"></a>').appendTo($subklass)
+            $(' <a class="fui-heart"></a>').appendTo($subklass)
           })
         } else {
           var $klass  = $('<li>' + klass.code + '</li>')
@@ -59,8 +60,8 @@ $(function () {
                         .attr('klass', klass.code)
                         .appendTo($klasses)
 
-          $(' <a class="fui-heart"></a>').appendTo($klass)
           $(' <a class="fui-check"></a>').appendTo($klass)
+          $(' <a class="fui-heart"></a>').appendTo($klass)
         }
       })
     })
@@ -81,7 +82,7 @@ $(function () {
       }
 
       klass.schedule.forEach(function (scheduleItem) {
-        insertScheduleItem(course, klass, scheduleItem)
+        insertScheduleItem(course, klass, null, scheduleItem, 'confirmed')
       })
 
       if (klass.subklasses && item.subklass) {
@@ -92,7 +93,7 @@ $(function () {
         }
 
         subklass.schedule.forEach(function (scheduleItem) {
-          insertScheduleItem(course, subklass, scheduleItem)
+          insertScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
         })
       }
     })
@@ -106,7 +107,7 @@ $(function () {
       if (selected) {
         var $course = $availables
                       .find('[course="' + course.code + '"]')
-                      .css('background', course.color)
+                      .css('background-color', course.color)
                       .addClass(selected.status)
 
         var $klass = $course
@@ -169,10 +170,6 @@ $(function () {
   $availables.on('mouseenter', '.selectable', function () {
     var $this = $(this)
 
-    if ($this.hasClass('confirmed') || $this.hasClass('locked') || $this.hasClass('favored')) {
-      return
-    }
-
     var _subklass = $this.attr('subklass')
       , _klass = (_subklass ? $this.parents('[klass]') : $this).attr('klass')
       , _course = $this.parents('[course]').attr('course')
@@ -180,27 +177,138 @@ $(function () {
     var course = _.find(Availables, { code: _course })
     var klass = _.find(course.klasses, { code: _klass })
 
+    $schedule
+    .find('[course="' + _course + '"]:not(.preview)')
+    .hide()
+
     klass.schedule.forEach(function (scheduleItem) {
-      insertScheduleItem(course, klass, scheduleItem, true)
+      insertScheduleItem(course, klass, null, scheduleItem, 'preview')
     })
 
     if (klass.subklasses && _subklass) {
       var subklass = _.find(klass.subklasses, { code: _subklass })
       subklass.schedule.forEach(function (scheduleItem) {
-        insertScheduleItem(course, subklass, scheduleItem, true)
+        insertScheduleItem(course, klass, subklass, scheduleItem, 'preview')
       })
     }
+
+    $schedule
+    .find('[course="' + _course + '"].preview')
+    .addClass('twinkling')
   })
 
   $availables.on('mouseleave', '.selectable', function () {
-    $('#schedule').find('.preview').remove()
+    var $this = $(this)
+
+    var _subklass = $this.attr('subklass')
+      , _klass = (_subklass ? $this.parents('[klass]') : $this).attr('klass')
+      , _course = $this.parents('[course]').attr('course')
+
+    $schedule
+    .find('[course="' + _course + '"].preview')
+    .remove()
+
+    $schedule
+    .find('[course="' + _course + '"]:not(.preview)')
+    .show()
   })
 
-  $availables.on('click', '.selectable', function () {
+  $availables.on('click', '.selectable:not(.conflit) .fui-check', function () {
+    var $this = $(this).parents('.selectable')
 
+    var $klass  = $this.attr('subklass') ? $this.parents('[klass]') : $this
+      , $course = $this.parents('[course]')
+
+    var _subklass = $this.attr('subklass')
+      , _klass    = $klass.attr('klass')
+      , _course   = $course.attr('course')
+
+    if ($this.hasClass('confirmed')) {
+      $this.removeClass('confirmed')
+      $klass.removeClass('confirmed')
+      $course.removeClass('confirmed').css('background-color', '')
+
+      $schedule.find('[course="' + _course + '"]').remove()
+
+      Confirmed = _.reject(Confirmed, { code: _course })
+
+      processConflits()
+    } else {
+      $schedule.find('[course="' + _course + '"]').remove()
+
+      var course = _.find(Availables, { code: _course })
+      var klass = _.find(course.klasses, { code: _klass })
+
+      $this.removeClass('favored').addClass('confirmed')
+      $klass.removeClass('favored').addClass('confirmed')
+      $course.removeClass('favored')
+             .addClass('confirmed')
+             .css('background-color', course.color)
+
+      klass.schedule.forEach(function (scheduleItem) {
+        insertScheduleItem(course, klass, null, scheduleItem, 'confirmed')
+      })
+
+      if (klass.subklasses && _subklass) {
+        var subklass = _.find(klass.subklasses, { code: _subklass })
+        subklass.schedule.forEach(function (scheduleItem) {
+          insertScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
+        })
+      }
+
+      Confirmed.push({
+        code: _course
+      , klass: _klass
+      , subklass: _subklass
+      , status: 'confirmed'
+      })
+
+      processConflits()
+    }
   })
 
-  function insertScheduleItem (course, klass, scheduleItem, preview) {
+  $availables.on('click', '.selectable:not(.conflit):not(.confirmed) .fui-heart', function () {
+    var $this = $(this).parents('.selectable')
+
+    var $klass  = $this.attr('subklass') ? $this.parents('[klass]') : $this
+      , $course = $this.parents('[course]')
+
+    var _subklass = $this.attr('subklass')
+      , _klass    = $klass.attr('klass')
+      , _course   = $course.attr('course')
+
+    if ($this.hasClass('favored')) {
+      $this.removeClass('favored')
+      $klass.removeClass('favored')
+      $course.removeClass('favored').css('background-color', '')
+
+      $schedule.find('[course="' + _course + '"]').remove()
+    } else {
+      $schedule.find('[course="' + _course + '"]').remove()
+
+      var course = _.find(Availables, { code: _course })
+      var klass = _.find(course.klasses, { code: _klass })
+
+      $this.removeClass('confirmed').addClass('favored')
+      $klass.removeClass('confirmed').addClass('favored')
+      $course.removeClass('confirmed')
+             .addClass('favored')
+             .css('background-color', course.color)
+
+      klass.schedule.forEach(function (scheduleItem) {
+        insertScheduleItem(course, klass, null, scheduleItem, 'favored')
+      })
+
+      if (klass.subklasses && _subklass) {
+        var subklass = _.find(klass.subklasses, { code: _subklass })
+        subklass.schedule.forEach(function (scheduleItem) {
+          insertScheduleItem(course, klass, subklass, scheduleItem, 'favored')
+        })
+      }
+    }
+  })
+
+  function insertScheduleItem (course, klass, subklass, scheduleItem, status) {
     if (!course.color) {
       var h = Math.random() * 180 + Math.random() * 180
         , s = Math.random() * 30 + 20
@@ -211,11 +319,12 @@ $(function () {
 
     var html = ''
     html += '<li'
-              + ' style="background:' + course.color + '"'
+              + ' style="background-color:' + course.color + '"'
               + ' title="' + course.name + '"'
-              + ' data-course="' + course.code + '"'
-              + ' data-klass="' + klass.code + '"'
-              + (preview ? ' class="preview twinkling"' : '')
+              + ' course="' + course.code + '"'
+              + ' klass="' + klass.code + '"'
+              + (subklass ? ' subklass="' + subklass.code + '"' : '')
+              + ' class="' + status + '"'
               + '>'
     html += '<h3>' + course.name + '</h3>'
     html += '<p class="details">'
@@ -255,12 +364,16 @@ $(function () {
     if (week.which) {
       week.which.forEach(function (w) {
         weeks[w - 1] = true
-        markBusy(scheduleItem.week.day, scheduleItem.time.which, w)
+        if ('confirmed' === status) {
+          markBusy(scheduleItem.week.day, scheduleItem.time.which, w)
+        }
       })
     } else if (week.interval) {
       for (var w = week.start; w <= week.end; w += week.interval) {
         weeks[w - 1] = true
-        markBusy(scheduleItem.week.day, scheduleItem.time.which, w)
+        if ('confirmed' === status) {
+          markBusy(scheduleItem.week.day, scheduleItem.time.which, w)
+        }
       }
     }
 
@@ -285,7 +398,7 @@ $(function () {
         var $klass = $course
                      .find('[klass="' + klass.code + '"]')
 
-        var klassConflit = isConflit(klass)
+        var klassConflit = isConflit(course, klass)
         if (klassConflit) {
           $klass.addClass('conflit')
         }
@@ -297,7 +410,7 @@ $(function () {
             var $subklass = $klass
                             .find('[subklass="' + subklass.code + '"]')
 
-            var subklassConflit = isConflit(subklass)
+            var subklassConflit = isConflit(course, subklass)
             if (subklassConflit) {
               $subklass.addClass('conflit')
             } else {
@@ -321,13 +434,13 @@ $(function () {
     })
   }
 
-  function isConflit (klass) {
-    if (_.find(Confirmed, { klass: klass.code }) ||
-        _.find(Confirmed, { subklass: klass.code })) {
+  function isConflit (course, xklass) {
+    console.log(arguments)
+    if (_.find(Confirmed, { code: course.code })) {
       return false
     }
 
-    return klass.schedule.some(function (item) {
+    return xklass.schedule.some(function (item) {
       var weeks = []
       for (var i = 0; i < 20; i++) {
         weeks[i] = false

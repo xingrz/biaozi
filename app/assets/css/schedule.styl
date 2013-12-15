@@ -1,0 +1,120 @@
+
+#schedule {
+  position absolute
+  left 200px
+  top 50px
+  right 0
+  bottom 0
+  color #000
+  font-size 90%
+  overflow-y scroll
+}
+
+#schedule table {
+  width 100%
+  table-layout fixed
+}
+
+#schedule th {
+  text-align center
+  padding 5px
+  border 1px solid #eee
+  font-weight normal
+  vertical-align top
+  white-space nowrap
+  overflow hidden
+}
+
+#schedule tr:nth-child(even) {
+  background #fcfdff
+}
+
+#schedule tr:nth-child(odd) {
+  background #fff
+}
+
+#schedule td {
+  border 1px solid #eee
+  vertical-align top
+}
+
+#schedule h3 {
+  font-size inherit
+}
+
+#schedule p {
+  font-size inherit
+}
+
+#schedule ul {
+  list-style none
+  margin 0
+  padding 0
+  min-height 80px
+}
+
+@-webkit-keyframes pending {
+  0%   { color rgba(0, 0, 0, 0.10) }
+  50%  { color rgba(0, 0, 0, 0.75) }
+  100% { color rgba(0, 0, 0, 0.10) }
+}
+
+#schedule ul li {
+  display block
+  margin 0
+  padding 0
+  height 40px
+
+  &.twinkling {
+    -webkit-animation pending linear 1s infinite
+  }
+}
+
+#schedule ul li h3 {
+  margin 0
+  position relative
+  z-index 1
+  line-height 20px
+  height 20px
+  padding 0 5px
+  white-space nowrap
+  overflow hidden
+  text-overflow ellipsis
+}
+
+#schedule ul li .details {
+  margin 0
+  position relative
+  z-index 1
+  line-height 20px
+  height 20px
+  padding 0 5px
+  white-space nowrap
+  overflow hidden
+  text-overflow ellipsis
+}
+
+#schedule ul li .details span {
+  margin-right 1em
+}
+
+#schedule ul li .graph {
+  white-space nowrap
+  font-size 0
+  margin 0
+  position relative
+  top -40px
+  height 40px
+}
+
+#schedule ul li .graph i {
+  display inline-block
+  height 100%
+  width 5%
+  background #fff
+  opacity 0.9
+}
+
+#schedule ul li .graph i.y {
+  opacity 0.6
+}

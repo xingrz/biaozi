@@ -1,0 +1,160 @@
+#availables {
+  position absolute
+  left 0
+  top 50px
+  width 200px
+  bottom 0
+  overflow-y scroll
+  list-style none
+  margin 0
+  padding 0
+
+  &.hide-not-met      > li.not-met,
+  &.hide-all-conflit  > li.all-conflit {
+    display none
+  }
+
+  > li {
+    display block
+    color #fff
+    margin 0
+    overflow hidden
+    line-height 40px
+    height 40px
+
+    &:hover > strong {
+      background rgba(255, 255, 255, 0.1)
+    }
+
+    &.expanded {
+      height auto
+    }
+
+    &.confirmed,
+    &.favored {
+      color #fff
+      > strong::before {
+        float right
+        font-family 'Flat-UI-Icons'
+        -webkit-font-smoothing antialiased
+      }
+    }
+
+    &.confirmed > strong::before {
+      content '\e00a'
+    }
+
+    &.favored > strong::before {
+      content '\e007'
+    }
+
+    &.not-met > strong {
+      text-decoration line-through
+      color rgba(255, 255, 255, 0.2)
+    }
+
+    &.all-conflit > strong {
+      text-decoration line-through
+      color rgba(255, 255, 255, 0.2)
+    }
+
+    > strong {
+      display block
+      font-weight normal
+      overflow hidden
+      text-overflow ellipsis
+      white-space nowrap
+      padding 0 20px
+      cursor pointer
+      transition background 500ms
+
+      > p {
+        font-weight normal
+        font-size inherit
+        margin 0
+        color rgba(255, 255, 255, 0.75)
+      }
+    }
+
+    .fui-heart,
+    .fui-check {
+      color rgba(0, 0, 0, 0.1)
+      float right
+      cursor pointer
+      transition color 300ms
+      margin-right 10px
+
+      &:hover {
+        color rgba(0, 0, 0, 0.4)
+      }
+      &:active {
+        color #fff
+      }
+    }
+
+    ul {
+      padding 0
+      margin 0
+      list-style none
+
+      li {
+        display block
+        margin 0
+        padding 0
+        color rgba(255, 255, 255, 0.7)
+        transition color 300ms
+
+        &:hover {
+          color rgba(255, 255, 255, 1.0)
+        }
+
+        &.conflit {
+          text-decoration line-through
+          color rgba(0, 0, 0, 0.5)
+
+          ul {
+            display none
+          }
+
+          .fui-heart,
+          .fui-check {
+            opacity 0
+          }
+        }
+
+        &.confirmed,
+        &.favored {
+          color #fff
+        }
+
+        &.confirmed > .fui-check,
+        &.favored   > .fui-heart {
+          color #fff
+        }
+
+        &.confirmed > .fui-heart {
+          opacity 0
+        }
+      }
+    }
+
+    > ul {
+      background rgba(0, 0, 0, 0.1)
+
+      > li {
+        padding-left 30px
+        padding-right 10px
+        cursor pointer
+        transition background 500ms
+
+        &:hover {
+          background rgba(255, 255, 255, 0.1)
+        }
+
+        > ul > li {
+          padding-left 1em;
+        }
+      }
+    }
+  }
+}
