@@ -196,6 +196,10 @@ $(function () {
     $('#schedule').find('.preview').remove()
   })
 
+  $availables.on('click', '.selectable', function () {
+
+  })
+
   function insertScheduleItem (course, klass, scheduleItem, preview) {
     if (!course.color) {
       var h = Math.random() * 180 + Math.random() * 180
