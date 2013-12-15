@@ -19,78 +19,132 @@ exports.index = function (req, res, error) {
               })
 }
 
-exports.modify = function (req, res, error) {
-  var ep = new EventProxy()
+exports.confirm = function (req, res, error) {
+  if (!req.body.klass) {
+    return res.send(400)
+  }
 
-  CalendarItem.find({ where: { UserId: req.user.id, code: req.params.code } })
-              .complete(ep.done('find'))
-
-  ep.once('find', function (item) {
-    if (item) {
-      if (req.body.klass) {
-        item.klass = req.body.klass
-      }
-
-      if (req.body.subklass) {
-        item.subklass = req.body.subklass
-      }
-
-      if (req.body.status) {
-        item.status = req.body.status
-      }
-
-      if (item.subklass) {
-        var match = item.subklass.match(/^([A-Z]+)([0-9]+)$/)
-        if (!match || item.klass !== match[1] || +match[2] < 1) {
-          return res.send(409)
-        }
-      }
-
-      if (item.status && !_.contains([ 'confirmed', 'favored' ], item.status)) {
-        return res.send(409)
-      }
-
-      item.save().complete(ep.done('updated'))
-    } else {
-      if (!req.body.klass || !req.body.status) {
-        return res.send(409)
-      }
-
-      if (req.body.subklass) {
-        var match = req.body.subklass.match(/^([A-Z]+)([0-9]+)$/)
-        if (!match || req.body.klass !== match[1] || +match[2] < 1) {
-          return res.send(409)
-        }
-      }
-
-      if (req.body.status && !_.contains([ 'confirmed', 'favored' ], req.body.status)) {
-        return res.send(409)
-      }
-
-      CalendarItem.create({
-                    code: req.params.code
-                  , klass: req.body.klass
-                  , subklass: req.body.subklass
-                  , status: req.body.status
-                  , UserId: req.user.id
-                  })
-                  .complete(ep.done('created'))
+  if (req.body.subklass) {
+    var match = req.body.subklass.match(/^([A-Z]+)([0-9]+)$/)
+    if (!match || req.body.klass !== match[1] || +match[2] < 1) {
+      return res.send(409)
     }
+  }
+
+  var ep = new EventProxy
+
+  // 一旦 confirm 了某个班，即可清除所有 favored
+  // 只能存在一个 confirmed，因此也要一并清除旧的 confirmed
+
+  ep.once('start', function () {
+    CalendarItem.destroy({ UserId: req.user.id, code: req.params.code })
+                .complete(ep.done('removed'))
   })
 
-  ep.all('find', 'updated', function (calendar) {
-    res.send(200, calendar)
+  ep.once('removed', function () {
+    CalendarItem.create({
+                  UserId: req.user.id
+                , code: req.params.code
+                , klass: req.body.klass
+                , subklass: req.body.subklass || null
+                , status: 'confirmed'
+                })
+                .complete(ep.done('done'))
   })
 
-  ep.once('created', function (calendar) {
-    res.send(200, calendar)
+  ep.once('done', function () {
+    res.send(201, {
+      code: req.params.code
+    , klass: req.body.klass
+    , subklass: req.body.subklass || null
+    , status: 'confirmed'
+    })
   })
 
-  ep.fail(error)
+  ep.fail(error).emit('start')
 }
 
-exports.remove = function (req, res, error) {
-  CalendarItem.destroy({ code: req.params.code, UserId: req.user.id })
+exports.deny = function (req, res, error) {
+  // 取消 confirmed 的情景貌似没有
+  // 一般只是手滑点了 confirm
+
+  CalendarItem.destroy({
+                UserId: req.user.id
+              , code: req.params.code
+              , status: 'confirmed'
+              })
+              .error(error)
+              .success(function () {
+                res.send(204)
+              })
+}
+
+exports.favor = function (req, res, error) {
+  if (!req.body.klass) {
+    return res.send(400)
+  }
+
+  if (req.body.subklass) {
+    var match = req.body.subklass.match(/^([A-Z]+)([0-9]+)$/)
+    if (!match || req.body.klass !== match[1] || +match[2] < 1) {
+      return res.send(409)
+    }
+  }
+
+  var ep = new EventProxy
+
+  // 一个 course 可以有多个不同的 favored
+  // 但会覆盖相同 xklass 的 confirmed
+
+  ep.once('start', function () {
+    CalendarItem.destroy({
+                  UserId: req.user.id
+                , code: req.params.code
+                , klass: req.body.klass
+                , subklass: req.body.subklass || null
+                , status: 'confirmed'
+                })
+                .complete(ep.done('clean'))
+  })
+
+  ep.once('start', function () {
+    CalendarItem.findOrCreate({
+                  UserId: req.user.id
+                , code: req.params.code
+                , klass: req.body.klass
+                , subklass: req.body.subklass || null
+                , status: 'favored'
+                }, {})
+                .complete(ep.done('created'))
+  })
+
+  ep.all('clean', 'created', function () {
+    res.send(201, {
+      code: req.params.code
+    , klass: req.body.klass
+    , subklass: req.body.subklass || null
+    , status: 'favored'
+    })
+  })
+
+  ep.fail(error).emit('start')
+}
+
+exports.bore = function (req, res, error) {
+  if (req.params.subklass) {
+    var match = req.params.subklass.match(/^([A-Z]+)([0-9]+)$/)
+    if (!match || req.params.klass !== match[1] || +match[2] < 1) {
+      return res.send(409)
+    }
+  }
+
+  CalendarItem.destroy({
+                UserId: req.user.id
+              , code: req.params.code
+              , klass: req.params.klass
+              , subklass: req.params.subklass || null
+              , status: 'favored'
+              })
               .error(error)
               .success(function () {
                 res.send(204)

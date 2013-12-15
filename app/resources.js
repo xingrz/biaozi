@@ -14,8 +14,15 @@ module.exports = function (app) {
 
   var calendarApi = require('../routes/api/calendar')
   app.get('/api/calendar'       , ensureLoggedIn, calendarApi.index)
-     .put('/api/calendar/:code' , ensureLoggedIn, calendarApi.modify)
-     .del('/api/calendar/:code' , ensureLoggedIn, calendarApi.remove)
+     //.put('/api/calendar/:code' , ensureLoggedIn, calendarApi.modify)
+     //.del('/api/calendar/:code' , ensureLoggedIn, calendarApi.remove)
+
+  app.del('/api/calendar/:code/confirmed' , ensureLoggedIn, calendarApi.deny)
+    .post('/api/calendar/:code/confirmed' , ensureLoggedIn, calendarApi.confirm)
+
+  app.del('/api/calendar/:code/favored/:klass'          , ensureLoggedIn, calendarApi.bore)
+     .del('/api/calendar/:code/favored/:klass/:subklass', ensureLoggedIn, calendarApi.bore)
+    .post('/api/calendar/:code/favored'                 , ensureLoggedIn, calendarApi.favor)
 
   var confirmedApi = require('../routes/api/confirmed')
   app.get('/api/confirmed', ensureLoggedIn, confirmedApi.show)
