@@ -200,7 +200,7 @@ $(function () {
     if (!course.color) {
       var h = Math.random() * 180 + Math.random() * 180
         , s = Math.random() * 30 + 20
-        , l = Math.random() * 30 + 30
+        , l = Math.random() * 30 + 40
 
       course.color = 'hsl(' + h + ',' + s + '%,' + l + '%)'
     }
