@@ -2,10 +2,6 @@ var User = require('../../models').User
 
 var sise = require('../../lib/sise')
 
-exports.create = function (req, res, error) {
-
-}
-
 exports.show = function (req, res, error) {
   sise.confirmed(req.user.key, function (err, confirmed) {
     if (err) {

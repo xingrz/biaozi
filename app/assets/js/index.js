@@ -86,6 +86,11 @@ $(function () {
 
       if (klass.subklasses && item.subklass) {
         var subklass = _.find(klass.subklasses, { code: item.subklass })
+        if (!subklass) {
+          // It's none of my business that you make invalid requests
+          return
+        }
+
         subklass.schedule.forEach(function (scheduleItem) {
           insertScheduleItem(course, subklass, scheduleItem)
         })
