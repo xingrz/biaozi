@@ -6,6 +6,7 @@ var passport = require('passport')
   , _ = require('lodash')
   , readFile = require('fs').readFile
   , join = require('path').join
+  , async = require('async')
 
 // models
 var db = require('../models')
@@ -83,7 +84,9 @@ module.exports = function (app) {
 
       ep.once('generated', function (calendar) {
         debug('inserting %s calendar items', calendar.length)
-        db.CalendarItem.bulkCreate(calendar).complete(ep.done('calendar'))
+        async.map(calendar, function (item, next) {
+          db.CalendarItem.create(item).complete(next)
+        }, ep.done('calendar'))
       })
 
       ep.all('inserted', 'calendar', function (user, calendar) {
