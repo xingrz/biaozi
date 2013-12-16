@@ -222,7 +222,7 @@ $(function () {
     $klass.removeClass('confirmed')
     $course.removeClass('confirmed')
 
-    if (!$availables.find('[course="' + _course + '"] .favored').length) {
+    if (!$course.find('.favored').length) {
       $course.css('background-color', '')
     }
 
@@ -255,7 +255,7 @@ $(function () {
     var $this = $(this).parents('.selectable')
 
     var $klass  = $this.attr('subklass') ? $this.parents('[klass]') : $this
-      , $course = $this.parents('[course]')
+      , $course = $this.parents('[course]').removeClass('expanded')
 
     var _subklass = $this.attr('subklass')
       , _klass    = $klass.attr('klass')
@@ -352,7 +352,7 @@ $(function () {
     $klass.removeClass('favored')
     $course.removeClass('favored')
 
-    if (!$availables.find('[course="' + _course + '"] .confirmed').length) {
+    if (!$course.find('.confirmed, .favored').length) {
       $course.css('background-color', '')
     }
 
@@ -539,6 +539,7 @@ $(function () {
                     .find('[course="' + course.code + '"]')
 
       var hasKlass = false
+        , cleanFavored = false
 
       course.klasses.forEach(function (klass) {
         var $klass = $course
@@ -546,7 +547,10 @@ $(function () {
 
         var klassConflit = isConflit(course, klass)
         if (klassConflit) {
-          $klass.addClass('conflit').removeClass('favored')
+          $klass.addClass('conflit')
+          .removeClass('favored')
+
+          cleanFavored = true
         } else {
           $klass.removeClass('conflit')
         }
@@ -560,7 +564,12 @@ $(function () {
 
             var subklassConflit = isConflit(course, subklass) || klassConflit
             if (subklassConflit) {
-              $subklass.addClass('conflit').removeClass('favored')
+              $subklass.addClass('conflit')
+              .removeClass('favored')
+
+              cleanFavored = true
+
+              bore(course, klass, subklass)
             } else {
               $subklass.removeClass('conflit')
               hasSubklass = true
@@ -568,38 +577,32 @@ $(function () {
           })
 
           if (!hasSubklass) {
-            $klass.addClass('conflit').removeClass('favored')
+            $klass.addClass('conflit')
+            .removeClass('favored')
+
+            cleanFavored = true
           } else {
             $klass.removeClass('conflit')
           }
+        }
+
+        if (klassConflit && !klass.subklasses) {
+          bore(course, klass, null)
         }
 
         if (!klassConflit && (hasSubklass || !klass.subklasses)) {
           hasKlass = true
         }
       })
-/*
-    var $this = $(this).parents('.selectable')
 
-    var $klass  = $this.attr('subklass') ? $this.parents('[klass]') : $this
-      , $course = $this.parents('[course]')
+      if (cleanFavored) {
+        $course.removeClass('favored')
 
-    var _subklass = $this.attr('subklass')
-      , _klass    = $klass.attr('klass')
-      , _course   = $course.attr('course')
+        if (!$course.find('.confirmed, .favored').length) {
+          $course.css('background-color', '')
+        }
+      }
 
-    if (!$availables.find('[course="' + _course + '"] .confirmed').length) {
-      $course.css('background-color', '')
-    }
-
-    var course    = _.find(Availables, { code: _course })
-      , klass     = _.find(course.klasses, { code: _klass })
-      , subklass  = klass.subklasses && _subklass
-                  ? _.find(klass.subklasses, { code: _subklass })
-                  : null
-
-    bore(course, klass, subklass)
-*/
       if (!hasKlass) {
         $course.addClass('all-conflit')
       } else {
