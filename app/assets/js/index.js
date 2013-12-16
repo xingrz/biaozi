@@ -93,7 +93,7 @@ $(function () {
         }
 
         subklass.schedule.forEach(function (scheduleItem) {
-          insertScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
+          insertScheduleItem(course, klass, subklass, scheduleItem, 'confirmed', true)
         })
       }
     })
@@ -194,7 +194,7 @@ $(function () {
 
     if (subklass) {
       subklass.schedule.forEach(function (scheduleItem) {
-        previewScheduleItem(course, klass, subklass, scheduleItem)
+        previewScheduleItem(course, klass, subklass, scheduleItem, true)
       })
     }
 
@@ -222,7 +222,9 @@ $(function () {
     $klass.removeClass('confirmed')
     $course.removeClass('confirmed')
 
-    $course.css('background-color', '')
+    if (!$availables.find('[course="' + _course + '"] .favored').length) {
+      $course.css('background-color', '')
+    }
 
     var course    = _.find(Availables, { code: _course })
       , klass     = _.find(course.klasses, { code: _klass })
@@ -235,12 +237,12 @@ $(function () {
 
   function deny (course, klass, subklass) {
     klass.schedule.forEach(function (scheduleItem) {
-      removeScheduleItem(course, klass, null, scheduleItem)
+      removeScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
     })
 
     if (subklass) {
       subklass.schedule.forEach(function (scheduleItem) {
-        removeScheduleItem(course, klass, subklass, scheduleItem)
+        removeScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
       })
     }
 
@@ -283,6 +285,10 @@ $(function () {
                            : null
 
       deny(course, previousKlass, previousSubklass)
+
+      $schedule
+      .find(selector(_course, _previousKlass, _previousSubklass))
+      .remove()
     }
 
     $availables
@@ -290,15 +296,19 @@ $(function () {
     .removeClass('confirmed')
 
     // clean previous favored
+    $schedule
+    .find('[course="' + _course + '"]:not([klass="' + _klass + '"]).favored')
+    .remove()
+
     if (_subklass) {
       $schedule
-      .find('[course="' + _course + '"]:not([klass="' + _klass + '"][subklass="' + _subklass + '"]).favored')
-      .remove()
-    } else {
-      $schedule
-      .find('[course="' + _course + '"]:not([klass="' + _klass + '"]).favored')
+      .find('[course="' + _course + '"][klass="' + _klass + '"]:not([subklass="' + _subklass + '"]).favored')
       .remove()
     }
+
+    $availables
+    .find('[course="' + _course + '"].favored')
+    .removeClass('favored')
 
     $availables
     .find('[course="' + _course + '"] .favored')
@@ -340,10 +350,32 @@ $(function () {
 
     $this.removeClass('favored')
     $klass.removeClass('favored')
-    $course.removeClass('favored').css('background-color', '')
+    $course.removeClass('favored')
 
-    $schedule.find(selector(_course, _klass, _subklass)).remove()
+    if (!$availables.find('[course="' + _course + '"] .confirmed').length) {
+      $course.css('background-color', '')
+    }
+
+    var course    = _.find(Availables, { code: _course })
+      , klass     = _.find(course.klasses, { code: _klass })
+      , subklass  = klass.subklasses && _subklass
+                  ? _.find(klass.subklasses, { code: _subklass })
+                  : null
+
+    bore(course, klass, subklass)
   })
+
+  function bore (course, klass, subklass) {
+    klass.schedule.forEach(function (scheduleItem) {
+      removeScheduleItem(course, klass, subklass, scheduleItem, 'favored')
+    })
+
+    if (subklass) {
+      subklass.schedule.forEach(function (scheduleItem) {
+        removeScheduleItem(course, klass, subklass, scheduleItem, 'favored')
+      })
+    }
+  }
 
   $availables.on('click', '.selectable:not(.conflit):not(.favored) .fui-heart', function () {
     var $this = $(this).parents('.selectable')
@@ -363,8 +395,11 @@ $(function () {
 
     $this.addClass('favored')
     $klass.addClass('favored')
-    $course.addClass('favored')
-           .css('background-color', course.color)
+
+    if (!$course.hasClass('confirmed')) {
+      $course.addClass('favored')
+             .css('background-color', course.color)
+    }
 
     klass.schedule.forEach(function (scheduleItem) {
       checkScheduleItem(course, klass, subklass, scheduleItem, 'favored')
@@ -377,12 +412,12 @@ $(function () {
     }
   })
 
-  function insertScheduleItem (course, klass, subklass, scheduleItem, status) {
-    previewScheduleItem(course, klass, subklass, scheduleItem)
+  function insertScheduleItem (course, klass, subklass, scheduleItem, status, isSubklass) {
+    previewScheduleItem(course, klass, subklass, scheduleItem, isSubklass)
     checkScheduleItem(course, klass, subklass, scheduleItem, status)
   }
 
-  function previewScheduleItem (course, klass, subklass, scheduleItem) {
+  function previewScheduleItem (course, klass, subklass, scheduleItem, isSubklass) {
     if (!course.color) {
       var h = Math.random() * 180 + Math.random() * 180
         , s = Math.random() * 30 + 20
@@ -402,7 +437,7 @@ $(function () {
               + '>'
     html += '<h3>' + course.name + '</h3>'
     html += '<p class="details">'
-    html += '<span class="class">' + klass.code + '</span>'
+    html += '<span class="class">' + (isSubklass ? subklass.code : klass.code) + '</span>'
     html += '<span class="teacher">' + klass.teacher + '</span>'
 
     var week = scheduleItem.week
@@ -476,19 +511,24 @@ $(function () {
     }
   }
 
-  function removeScheduleItem (course, klass, subklass, scheduleItem) {
+  function removeScheduleItem (course, klass, subklass, scheduleItem, status) {
     $schedule
-    .find('[course="' + course.code + '"][klass="' + klass.code + '"]')
-    .remove()
+    .find(selector(course.code, klass.code, subklass ? subklass.code : null))
+    .removeClass('confirmed')
+    .removeClass('favored')
+    .addClass('preview')
+    .addClass('twinkling')
 
-    var week = scheduleItem.week
-    if (week.which) {
-      week.which.forEach(function (w) {
-        free(scheduleItem.week.day, scheduleItem.time.which, w)
-      })
-    } else if (week.interval) {
-      for (var w = week.start; w <= week.end; w += week.interval) {
-        free(scheduleItem.week.day, scheduleItem.time.which, w)
+    if ('confirmed' === status) {
+      var week = scheduleItem.week
+      if (week.which) {
+        week.which.forEach(function (w) {
+          free(scheduleItem.week.day, scheduleItem.time.which, w)
+        })
+      } else if (week.interval) {
+        for (var w = week.start; w <= week.end; w += week.interval) {
+          free(scheduleItem.week.day, scheduleItem.time.which, w)
+        }
       }
     }
   }
@@ -506,7 +546,7 @@ $(function () {
 
         var klassConflit = isConflit(course, klass)
         if (klassConflit) {
-          $klass.addClass('conflit')
+          $klass.addClass('conflit').removeClass('favored')
         } else {
           $klass.removeClass('conflit')
         }
@@ -518,9 +558,9 @@ $(function () {
             var $subklass = $klass
                             .find('[subklass="' + subklass.code + '"]')
 
-            var subklassConflit = isConflit(course, subklass)
+            var subklassConflit = isConflit(course, subklass) || klassConflit
             if (subklassConflit) {
-              $subklass.addClass('conflit')
+              $subklass.addClass('conflit').removeClass('favored')
             } else {
               $subklass.removeClass('conflit')
               hasSubklass = true
@@ -528,7 +568,7 @@ $(function () {
           })
 
           if (!hasSubklass) {
-            $klass.addClass('conflit')
+            $klass.addClass('conflit').removeClass('favored')
           } else {
             $klass.removeClass('conflit')
           }
@@ -538,7 +578,28 @@ $(function () {
           hasKlass = true
         }
       })
+/*
+    var $this = $(this).parents('.selectable')
 
+    var $klass  = $this.attr('subklass') ? $this.parents('[klass]') : $this
+      , $course = $this.parents('[course]')
+
+    var _subklass = $this.attr('subklass')
+      , _klass    = $klass.attr('klass')
+      , _course   = $course.attr('course')
+
+    if (!$availables.find('[course="' + _course + '"] .confirmed').length) {
+      $course.css('background-color', '')
+    }
+
+    var course    = _.find(Availables, { code: _course })
+      , klass     = _.find(course.klasses, { code: _klass })
+      , subklass  = klass.subklasses && _subklass
+                  ? _.find(klass.subklasses, { code: _subklass })
+                  : null
+
+    bore(course, klass, subklass)
+*/
       if (!hasKlass) {
         $course.addClass('all-conflit')
       } else {
@@ -550,6 +611,7 @@ $(function () {
   function isConflit (course, xklass) {
     if (_.find(Confirmed, { code: course.code, klass: xklass.code }) ||
         _.find(Confirmed, { code: course.code, subklass: xklass.code }) ) {
+      // 自己怎么可以和自己冲突呢对不
       return false
     }
 
@@ -560,18 +622,21 @@ $(function () {
       }
 
       if (item.week.which) {
-        item.week.which.forEach(function (w) {
-          weeks[w - 1] = true
+        var conflit = item.week.which.some(function (w) {
+          Schedule[item.time.which][item.week.day][w]
         })
+        if (conflit) {
+          return true
+        }
       } else if (item.week.interval) {
         for (var w = item.week.start; w <= item.week.end; w += item.week.interval) {
-          weeks[w - 1] = true
+          if (Schedule[item.time.which][item.week.day][w]) {
+            return true
+          }
         }
       }
 
-      return weeks.some(function (used, w) {
-        return used && Schedule[item.time.which][item.week.day][w]
-      })
+      return false
     })
   }
 
@@ -585,7 +650,7 @@ $(function () {
 
   function selector (course, klass, subklass) {
     return '[course="' + course + '"]'
-         + '[klass="' + klass + '"]'
+         + (klass ? '[klass="' + klass + '"]' : '')
          + (subklass ? '[subklass="' + subklass + '"]' : '')
   }
 })

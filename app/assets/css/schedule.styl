@@ -68,6 +68,28 @@
   &.twinkling {
     -webkit-animation pending linear 1s infinite
   }
+
+  &.preview {
+    opacity 0.5
+  }
+
+  &.confirmed,
+  &.favored {
+    > h3::before {
+      color rgba(0, 0, 0, 0.2)
+      float right
+      font-family 'Flat-UI-Icons'
+      -webkit-font-smoothing antialiased
+    }
+  }
+
+  &.confirmed > h3::before {
+    content '\e00a'
+  }
+
+  &.favored > h3::before {
+    content '\e007'
+  }
 }
 
 #schedule ul li h3 {
