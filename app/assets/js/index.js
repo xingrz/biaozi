@@ -152,6 +152,10 @@ $(function () {
     processConflits()
   })
 
+  ep.all('calendar', 'courses', 'confirmed', function () {
+    $('#loading').delay(1000).fadeOut(500)
+  })
+
   $.get('/api/calendar', function (calendar) {
     ep.emit('calendar', calendar)
   }, 'json')
@@ -207,6 +211,15 @@ $(function () {
   $availables.on('mouseleave', '.selectable', function () {
     $schedule.find('.preview').remove()
     $schedule.find('.twinkling').removeClass('twinkling')
+  })
+
+  $availables.on('click', '> li > strong', function () {
+    if ($(window).width() <= 720) {
+      var range = document.createRange()
+      range.setStart(this, 0)
+      range.setEnd(this, 1)
+      window.getSelection().addRange(range)
+    }
   })
 
   $availables.on('click', '.selectable:not(.conflit).confirmed .fui-check', function () {
@@ -674,14 +687,9 @@ $(function () {
     }
 
     return xklass.schedule.some(function (item) {
-      var weeks = []
-      for (var i = 0; i < 20; i++) {
-        weeks[i] = false
-      }
-
       if (item.week.which) {
         var conflit = item.week.which.some(function (w) {
-          Schedule[item.time.which][item.week.day][w]
+          return Schedule[item.time.which][item.week.day][w]
         })
         if (conflit) {
           return true

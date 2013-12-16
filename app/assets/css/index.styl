@@ -6,5 +6,111 @@ h2 {
   margin 0
 }
 
+#loading {
+  position absolute
+  left 0
+  top 0
+  right 0
+  bottom 0
+  z-index 1000
+
+  background #fff
+  text-align center
+  padding 200px 100px
+
+  .progress {
+    max-width 500px
+    margin 0 auto
+
+    .progress-bar {
+      width 100%
+    }
+  }
+
+  p {
+    margin-top 10px
+    font-size 14px
+  }
+}
+
 @import availables
 @import schedule
+
+
+@media(max-width: 720px) {
+  body {
+    background #F39C12
+  }
+
+  .navbar {
+    display none
+  }
+
+  #schedule {
+    display none
+  }
+
+  #availables {
+    position initial
+    width initial
+    left initial
+    top initial
+    bottom initial
+    background transparent !important
+
+    li:not(.confirmed):not(.favored) {
+      display none
+    }
+
+    > li.confirmed,
+    > li.favored {
+      height auto
+      background transparent !important
+      color #000
+
+      > strong {
+        font-weight bold
+        cursor default
+
+        &::before {
+          display none
+        }
+
+        p {
+          color inherit
+          display inline
+          padding-left 1em
+          line-height inherit
+        }
+      }
+
+      ul {
+        background none
+
+        li.confirmed,
+        li.favored {
+          color #000
+          cursor default
+
+          > .fui-heart,
+          > .fui-check {
+            color rgba(0, 0, 0, 0.5)
+
+            &:hover {
+              color rgba(0, 0, 0, 0.7)
+            }
+          }
+        }
+
+        li.confirmed > .fui-check {
+          display none
+        }
+
+        li.favored > .fui-heart::before {
+          content '\e00b'
+        }
+      }
+    }
+
+  }
+}

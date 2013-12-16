@@ -19,6 +19,11 @@ html
     script(src='/assets/js/index.js')
 
   body
+    div#loading
+      .progress.progress-striped.active
+        .progress-bar
+      p 请稍候，系统玩命加载中...
+
     div.navbar.navbar-inverse
       p.brand.pull-left 内啥：排课神器
       p.logged.pull-right
@@ -26,7 +31,7 @@ html
         | &nbsp;
         a(href='/signout') 注销
 
-    ul#availables.palette-peter-river.hide-not-met
+    ul#availables.palette-peter-river
 
     div#schedule
       table
