@@ -81,19 +81,17 @@ $(function () {
         return
       }
 
+      var subklass  = klass.subklasses && item.subklass
+                    ? _.find(klass.subklasses, { code: item.subklass })
+                    : null
+
       klass.schedule.forEach(function (scheduleItem) {
-        insertScheduleItem(course, klass, null, scheduleItem, 'confirmed')
+        insertScheduleItem(course, klass, subklass, scheduleItem, item.status)
       })
 
-      if (klass.subklasses && item.subklass) {
-        var subklass = _.find(klass.subklasses, { code: item.subklass })
-        if (!subklass) {
-          // It's none of my business that you make invalid requests
-          return
-        }
-
+      if (subklass) {
         subklass.schedule.forEach(function (scheduleItem) {
-          insertScheduleItem(course, klass, subklass, scheduleItem, 'confirmed', true)
+          insertScheduleItem(course, klass, subklass, scheduleItem, item.status, true)
         })
       }
     })
@@ -103,22 +101,25 @@ $(function () {
   function (courses, confirmed, calendar) {
     courses.forEach(function (course) {
       // 标记已选
-      var selected = _.find(calendar, { code: course.code })
-      if (selected) {
+      var selected = _.filter(calendar, { code: course.code })
+      if (selected.length) {
         var $course = $availables
                       .find('[course="' + course.code + '"]')
                       .css('background-color', course.color)
-                      .addClass(selected.status)
 
-        var $klass = $course
-                     .find('[klass="' + selected.klass + '"]')
-                     .addClass(selected.status)
+        selected.forEach(function (item) {
+          $course.addClass(item.status)
 
-        if (selected.subklass) {
-          $klass
-          .find('[subklass="' + selected.subklass + '"]')
-          .addClass(selected.status)
-        }
+          var $klass = $course
+                       .find('[klass="' + item.klass + '"]')
+                       .addClass(item.status)
+
+          if (item.subklass) {
+            $klass
+            .find('[subklass="' + item.subklass + '"]')
+            .addClass(item.status)
+          }
+        })
 
         return
       }
@@ -235,22 +236,6 @@ $(function () {
     deny(course, klass, subklass)
   })
 
-  function deny (course, klass, subklass) {
-    klass.schedule.forEach(function (scheduleItem) {
-      removeScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
-    })
-
-    if (subklass) {
-      subklass.schedule.forEach(function (scheduleItem) {
-        removeScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
-      })
-    }
-
-    Confirmed = _.reject(Confirmed, { code: course.code })
-
-    processConflits()
-  }
-
   $availables.on('click', '.selectable:not(.conflit):not(.confirmed) .fui-check', function () {
     var $this = $(this).parents('.selectable')
 
@@ -318,6 +303,10 @@ $(function () {
     $klass.addClass('confirmed')
     $course.addClass('confirmed').css('background-color', course.color)
 
+    konfirm(course, klass, subklass)
+  })
+
+  function konfirm (course, klass, subklass) {
     klass.schedule.forEach(function (scheduleItem) {
       checkScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
     })
@@ -329,14 +318,42 @@ $(function () {
     }
 
     Confirmed.push({
-      code: _course
-    , klass: _klass
-    , subklass: _subklass
+      code: course.code
+    , klass: klass.code
+    , subklass: (subklass ? subklass.code : null)
     , status: 'confirmed'
     })
 
+    $.ajax('/api/calendar/' + course.code + '/confirmed', {
+      type: 'POST'
+    , data: {
+        klass: klass.code
+      , subklass: (subklass ? subklass.code : null)
+      }
+    })
+
     processConflits()
-  })
+  }
+
+  function deny (course, klass, subklass) {
+    klass.schedule.forEach(function (scheduleItem) {
+      removeScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
+    })
+
+    if (subklass) {
+      subklass.schedule.forEach(function (scheduleItem) {
+        removeScheduleItem(course, klass, subklass, scheduleItem, 'confirmed')
+      })
+    }
+
+    Confirmed = _.reject(Confirmed, { code: course.code })
+
+    $.ajax('/api/calendar/' + course.code + '/confirmed', {
+      type: 'DELETE'
+    })
+
+    processConflits()
+  }
 
   $availables.on('click', '.selectable:not(.conflit).favored .fui-heart', function () {
     var $this = $(this).parents('.selectable')
@@ -365,18 +382,6 @@ $(function () {
     bore(course, klass, subklass)
   })
 
-  function bore (course, klass, subklass) {
-    klass.schedule.forEach(function (scheduleItem) {
-      removeScheduleItem(course, klass, subklass, scheduleItem, 'favored')
-    })
-
-    if (subklass) {
-      subklass.schedule.forEach(function (scheduleItem) {
-        removeScheduleItem(course, klass, subklass, scheduleItem, 'favored')
-      })
-    }
-  }
-
   $availables.on('click', '.selectable:not(.conflit):not(.favored) .fui-heart', function () {
     var $this = $(this).parents('.selectable')
 
@@ -401,6 +406,10 @@ $(function () {
              .css('background-color', course.color)
     }
 
+    favor(course, klass, subklass)
+  })
+
+  function favor (course, klass, subklass) {
     klass.schedule.forEach(function (scheduleItem) {
       checkScheduleItem(course, klass, subklass, scheduleItem, 'favored')
     })
@@ -410,7 +419,53 @@ $(function () {
         checkScheduleItem(course, klass, subklass, scheduleItem, 'favored')
       })
     }
-  })
+
+    Confirmed.push({
+      code: course.code
+    , klass: klass.code
+    , subklass: subklass.code
+    , status: 'favored'
+    })
+
+    $.ajax('/api/calendar/' + course.code + '/favored', {
+      type: 'POST'
+    , data: {
+        klass: klass.code
+      , subklass: (subklass ? subklass.code : null)
+      }
+    })
+  }
+
+  function bore (course, klass, subklass) {
+    klass.schedule.forEach(function (scheduleItem) {
+      removeScheduleItem(course, klass, subklass, scheduleItem, 'favored')
+    })
+
+    if (subklass) {
+      subklass.schedule.forEach(function (scheduleItem) {
+        removeScheduleItem(course, klass, subklass, scheduleItem, 'favored')
+      })
+    }
+
+    var item = _.find(Confirmed, {
+      code: course.code
+    , klass: klass.code
+    , subklass: (subklass ? subklass.code : null)
+    , status: 'favored'
+    })
+
+    if (item) {
+      Confirmed = _.reject(item)
+
+      var url = '/api/calendar/' + course.code
+              + '/favored/' + klass.code
+              + (subklass ? ('/' + subklass.code) : '')
+
+      $.ajax(url, {
+        type: 'DELETE'
+      })
+    }
+  }
 
   function insertScheduleItem (course, klass, subklass, scheduleItem, status, isSubklass) {
     previewScheduleItem(course, klass, subklass, scheduleItem, isSubklass)
