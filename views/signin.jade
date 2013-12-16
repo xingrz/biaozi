@@ -24,21 +24,63 @@ html
         text-align: right;
       }
 
+      body {
+        background: #F39C12;
+      }
+
+      .login-form {
+        float: right;
+        width: 400px;
+        margin: 20px;
+      }
+
+      article {
+        color: #000;
+      }
+
+      article h1 {
+        font-size: 60px;
+        font-weight: normal;
+      }
+
+      article ul {
+        margin: 30px 0;
+        padding: 0 2em;
+      }
+
+      article ul li {
+        font-size: 20px;
+        line-height: 50px;
+      }
+
+      footer {
+        background: none;
+        position: fixed;
+        bottom: 0;
+        font-weight: normal;
+        color: #000;
+        font-size: 14px;
+      }
+
   body
     div.container
-      div.login
-        div.login-screen
-          //- div.login-icon
-            //- img(src='/static/images/logo.png')
-            //- h4: strong 排课神器
+      form.login-form(method='post')
+        div.form-group
+          input(name='username', type='text', placeholder='学号', required, autofocus).form-control.login-field#login-name
+          label.login-field-icon.fui-user(for='login-name')
 
-          form.login-form(method='post')
-            div.form-group
-              input(name='username', type='text', placeholder='学号', required, autofocus).form-control.login-field#login-name
-              label.login-field-icon.fui-user(for='login-name')
+        div.form-group
+          input(name='password', type='password', placeholder='MYSISE 密码', required).form-control.login-field#login-pass
+          label.login-field-icon.fui-lock(for='login-pass')
 
-            div.form-group
-              input(name='password', type='password', placeholder='MYSISE 密码', required).form-control.login-field#login-pass
-              label.login-field-icon.fui-lock(for='login-pass')
+        button.btn.btn-info.btn-lg.btn-block(type='submit') 登录
 
-            button.btn.btn-info.btn-lg.btn-block(type='submit') 登录
+      article
+        h1 排课神器
+        ul
+          li 直观的上课周数显示
+          li 自动筛选上课时间
+          li 智能选课顺序提示
+
+      footer
+        p 2013 &copy; BestNG
