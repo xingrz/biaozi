@@ -1,10 +1,10 @@
-选课神器
+排课神器
 ======
 
 ## 运行环境
 
 * [NodeJS](http://nodejs.org) 0.10.X
-* [MariaDB](http://mariadb.org)(建议) 或 MySQL(http://www.mysql.com)
+* [MariaDB](http://mariadb.org)(建议) 或 [MySQL](http://www.mysql.com)
 
 ## 安装
 
@@ -35,6 +35,8 @@ $ NODE_ENV=production PORT=8080 pm2 start biaozi
 上报错误、提建议或者咨询请[新建 Issue](https://github.com/xingrz/biaozi/issues/new)。
 
 目前已知错误以及因为时间等原因尚未实现的功能详见[此处](https://github.com/xingrz/biaozi/issues?state=open)，提交 Pull Request 时请尽量顺便引用一下原 Issue。
+
+本项目仅提供预先制定选课计划的功能，不能用于也永远不会提供抢课、非法选课等违反校规之用途。任何违规功能的提交都会被拒绝合并。
 
 ## 协议
 
