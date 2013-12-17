@@ -26,7 +26,7 @@ build-js: install
 		--output ../../../public/assets/js/$$i \
 	); done
 
-install:
+install: build
 	@npm install
 
 debug:
