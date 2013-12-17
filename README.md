@@ -1,6 +1,11 @@
 选课神器
 ======
 
+## 运行环境
+
+* [NodeJS](http://nodejs.org) 0.10.X
+* [MariaDB](http://mariadb.org)(建议) 或 MySQL(http://www.mysql.com)
+
 ## 安装
 
 ```
