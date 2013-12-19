@@ -12,43 +12,34 @@ html
     link(rel='stylesheet', href='/assets/css/general.css')
     link(rel='stylesheet', href='/assets/css/index.css')
 
-    script(src='//cdn.staticfile.org/jquery/2.0.3/jquery.min.js')
-    script(src='//cdn.staticfile.org/lodash.js/2.4.1/lodash.min.js')
-    script(src='//cdn.staticfile.org/eventproxy/0.2.5/eventproxy.min.js')
+    script(src='//cdn.staticfile.org/seajs/2.1.1/sea.js')
+    script.
+      seajs.config({
+        base: '/assets/js/'
+      , alias: {
+          'jquery': '//cdn.staticfile.org/jquery/2.0.3/jquery.min.js'
+        , 'ember': '//cdn.staticfile.org/ember.js/1.3.0-beta.2/ember.js'
+        , 'handlebars': '//cdn.staticfile.org/handlebars.js/1.1.2/handlebars.js'
+        }
+      , preload: [ 'jquery', 'ember', 'handlebars' ]
+      })
 
-    script(src='/assets/js/index.js')
+      seajs.use('app')
+
+    //-script(src='//cdn.staticfile.org/jquery/2.0.3/jquery.min.js')
+    //-script(src='//cdn.staticfile.org/handlebars.js/1.1.2/handlebars.js')
+    //-script(src='//cdn.staticfile.org/ember.js/1.3.0-beta.2/ember.js')
+    //-script(src='//cdn.staticfile.org/lodash.js/2.4.1/lodash.min.js')
+    //-script(src='//cdn.staticfile.org/eventproxy/0.2.5/eventproxy.min.js')
+
+    //-script(src='/assets/js/index.js')
 
   body
-    div#loading
-      .progress.progress-striped.active
-        .progress-bar
-      p 请稍候，系统玩命加载中...
+    script(type='text/x-handlebars', data-template-name='application')
+      h1 Hahahahaha
+      {{outlet}}
 
-    div.navbar.navbar-inverse
-      p.brand.pull-left 内啥：排课神器
-      p.logged.pull-right
-        | #{logged.username}
-        | &nbsp;
-        a(href='/signout') 注销
-
-    ul#availables.palette-peter-river
-
-    div#schedule
-      table
-        tr
-          th
-          th(width='18%') 周一
-          th(width='18%') 周二
-          th(width='18%') 周三
-          th(width='18%') 周四
-          th(width='18%') 周五
-
-        times = [ '09:00 - 10:20', '10:40 - 12:00', '12:30 - 13:50', '14:00 - 15:20', '15:30 - 16:50', '17:00 - 18:20', '19:00 - 20:20', '20:30 - 21:50' ]
-
-        each timeName, time in times
-          tr(data-time='#{time}')
-            th
-              div #{time * 2 + 1} - #{time * 2 + 2}
-              div #{timeName}
-            - for (var day = 0; day < 5; day++)
-              td(data-day='#{day}'): ul
+    script(type='text/x-handlebars', data-template-name='contributors').
+      {{#each person in controller}}
+        {{person.login}}
+      {{/each}}
