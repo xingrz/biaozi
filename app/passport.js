@@ -138,7 +138,7 @@ function generate (jar, callback) {
 
   ep.once('start', function () {
     debug('fetching remote calendar')
-    sise.calendar(jar, 2013, 2, ep.done('calendar'))
+    sise.calendar(jar, 2014, 1, ep.done('calendar'))
   })
 
   ep.all('courses', 'calendar', function (courses, confirmed) {
