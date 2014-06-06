@@ -20,7 +20,7 @@
   , "passport-local": "0.1.X"
   , "request": "2.X"
   , "sequelize": "2.X"
-  , "stylus": "latest"
+  , "stylus": "0.40.0"
   , "lodash": "latest"
   }
 , "devDependencies": {
