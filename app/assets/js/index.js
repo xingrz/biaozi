@@ -436,7 +436,7 @@ $(function () {
     Confirmed.push({
       code: course.code
     , klass: klass.code
-    , subklass: subklass.code
+    , subklass: (subklass ? subklass.code : null)
     , status: 'favored'
     })
 
