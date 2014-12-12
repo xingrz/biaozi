@@ -8,7 +8,7 @@
     "async": "latest"
   , "cheerio": "latest"
   , "connect-ensure-login": "latest"
-  , "connect-redis": "latest"
+  , "connect-redis": "1.4.7"
   , "debug": "latest"
   , "eventproxy": "latest"
   , "express": "3.X"
@@ -22,6 +22,7 @@
   , "sequelize": "2.X"
   , "stylus": "0.40.0"
   , "lodash": "latest"
+  , "tough-cookie": "*"
   }
 , "devDependencies": {
     "mocha": "latest"
